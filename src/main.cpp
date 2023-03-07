@@ -7,15 +7,26 @@
 void LoadFile(std::string _file); // loads the .tga file
 void WriteFile(std::string _file); // writes the .tga file.
 
-Image* _image;
+void Multiply(std::string _file1, std::string _file2); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
+void Multiply(std::string _file1, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
+
+void Subtract(std::string _file1, std::string _file2); // Subtracts the pixels in _file1 from the pixels in _file2.
+
+void Add(std::string _file1, int num, char channel); // Adds pixels to a certain channel. 
+
+void Rotate(std::string _file1, int degrees); // Rotates the image in _file1 by a certain number of degrees.
+
+std::vector<Image> images;
 
 int main(int argc, const char** argv) {
+
+	
 
 	if (argc == 1) {
 		std::cout << "No commands provided" << std::endl;
 	}
 	else if (argc == 2) {
-
+		Image* _image;
 		if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
 			std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
 			std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
