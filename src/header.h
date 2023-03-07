@@ -9,7 +9,6 @@ public:
 		header = new Header(idLen, hasColorMap, imageType, colorMapOrigin, colorMapLen, colorMapDepth, xOrigin, yOrigin, width, height, bitsPerPixel, imageDescriptor);
 	}
 
-
 	// Header.
 	struct Header {
 		char idLen;
