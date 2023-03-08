@@ -3,8 +3,9 @@
 #include <vector>
 #include "string.h"
 #include "header.h"
+#include <string>
 
-void LoadFile(std::string _file); // loads the .tga file
+Image* LoadFile(std::string _file); // loads the .tga file and returns the image.
 void WriteFile(std::string _file); // writes the .tga file.
 
 void Multiply(std::string _file1, std::string _file2); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
@@ -17,26 +18,97 @@ void Add(std::string _file1, int num, char channel); // Adds pixels to a certain
 void Rotate(std::string _file1, int degrees); // Rotates the image in _file1 by a certain number of degrees.
 
 std::vector<Image> images;
+Image* _image;
 
 int main(int argc, const char** argv) {
 
-	
-
 	if (argc == 1) {
-		std::cout << "No commands provided" << std::endl;
+		Multiply(argv[1], std::stoi(argv[3]), 'b');
+		//std::cout << "No commands provided" << std::endl;
 	}
-	else if (argc == 2) {
-		Image* _image;
+	else if (argc == 2) { // Used for help command.
+	
 		if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
 			std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
 			std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
 		}
 		else {
 			LoadFile(argv[1]);
+			_image->DebugHeader();
+		}
+	}
+	else if (argc == 4) // Used for 1 image and another command to modify it.
+	{
+
+		// Scaling the singular image's color channels.
+		if (std::strcmp(argv[2], "scaleblue") == 0) {
+			Multiply(argv[1], std::stoi(argv[3]), 'b');
+		}
+		else if (std::strcmp(argv[2], "scalegreen") == 0) {
+			Multiply(argv[1], std::stoi(argv[3]), 'g');
+		}
+		else if (std::strcmp(argv[2], "scalered") == 0) {
+			Multiply(argv[1], std::stoi(argv[3]), 'r');
 		}
 	}
 
 	return 0;
+}
+
+void Multiply(std::string _file1, int scale, char channel) {
+	Image* og = LoadFile(_file1);
+
+	float normal = 0.0f; // calculates and stores the normalized channel value.
+
+	// Debugging the pixels.
+	std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	// Multiplying a pixel example.
+	if (channel == 'b') {
+
+		for (unsigned char*& i : og->GetPixels()) { // For each uses an iterator to quickly change every pixel in this 512x512 image. Source: https://www.geeksforgeeks.org/g-fact-40-foreach-in-c-and-java/ : cutting down from 4 minutes to 1.56 seconds.
+			// i is the dynamic array containing the b,g,r values of the pixel.
+			// the b value is accessed through i[0]. 
+			normal = (static_cast<float>((i[0])) / 255) * scale * 255 + 0.5f;
+			i[0] = static_cast<unsigned char>(normal);
+		}
+		
+	}
+	else if (channel == 'g') {
+
+		for (unsigned char*& i : og->GetPixels()) { 
+			// i is the dynamic array containing the b,g,r values of the pixel.
+			// the g value is accessed through i[1]. 
+			normal = (static_cast<float>((i[1])) / 255) * scale * 255 + 0.5f;
+			i[1] = static_cast<unsigned char>(normal);
+		}
+	}
+	else if (channel == 'r') {
+
+		for (unsigned char*& i : og->GetPixels()) { // For each uses an iterator to quickly change every pixel in this 512x512 image. Source: https://www.geeksforgeeks.org/g-fact-40-foreach-in-c-and-java/ : cutting down from 4 minutes to 1.56 seconds.
+			// i is the dynamic array containing the b,g,r values of the pixel.
+			// the r value is accessed through i[2]. 
+			normal = (static_cast<float>((i[2])) / 255) * scale * 255 + 0.5f;
+			i[2] = static_cast<unsigned char>(normal);
+		}
+	}
+
+	// Debugging the pixels.
+	std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	}
+
+
 }
 
 void WriteFile(std::string _file) {
@@ -50,14 +122,14 @@ void WriteFile(std::string _file) {
 	}
 }
 
-void LoadFile(std::string _file) {
+Image* LoadFile(std::string _file) {
 	std::vector<unsigned char*> pixels; // Stores all the pixels in the image, each entry has a dynamic array of 3 b g r pixels, representing the color.
 	std::ifstream file("input/" + _file, std::ios_base::binary);
 	std::cout << "Beginning to open file: " << _file << std::endl << std::endl;
 
 	if (!file.is_open()) { // Handling file can't open.
 		std::cout << "No file: " << _file << " exists!" << std::endl;
-		return;
+		return nullptr;
 	}
 	
 	// Reading the header file of the tga file.
@@ -116,16 +188,8 @@ void LoadFile(std::string _file) {
 
 	_image = new Image(pixels, id_len, color_map_type, image_type, color_map_origin, color_map_length, color_map_depth, x_origin, y_origin, width, height, pixel_depth, image_descriptor);
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (unsigned int i = 2; i < pixels.size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(pixels.at(i)[0]) << ", G: " << static_cast<int>(pixels.at(i)[1]) << ", R: " << static_cast<int>(pixels.at(i)[2]) << std::endl;
-	}
 	file.close();
-	
+	return _image;
 
 	//// Memory deallocation.
 	//for (unsigned int i = 0; i < pixels.size(); i++) {
