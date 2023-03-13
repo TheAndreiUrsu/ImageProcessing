@@ -11,52 +11,216 @@ void WriteFile(std::string _file); // writes the .tga file.
 void Multiply(std::string _file1, std::string _file2); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
 void Multiply(std::string _file1, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
 
+std::vector<float*> Normalize(std::vector<unsigned char*>& pixels); // Helper method for normalizing all the pixels.
+
 void Subtract(std::string _file1, std::string _file2); // Subtracts the pixels in _file1 from the pixels in _file2.
 
 void Add(std::string _file1, int num, char channel); // Adds pixels to a certain channel. 
 
 void Rotate(std::string _file1, int degrees); // Rotates the image in _file1 by a certain number of degrees.
 
+
+void Task1();
+void Task2();
+void Task3();
+void Task4();
+void Task5();
+void Task6();
+void Task7();
+void Task8();
+void Task9();
+void Task10();
+
 std::vector<Image> images;
 Image* _image;
 
 int main(int argc, const char** argv) {
-
-	if (argc == 1) {
-		Multiply(argv[1], std::stoi(argv[3]), 'b');
-		//std::cout << "No commands provided" << std::endl;
-	}
-	else if (argc == 2) { // Used for help command.
+	int option;
+	std::cout << "Choose a task to test: (1-10)" << std::endl;
+	std::cin >> option;
 	
-		if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
-			std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
-			std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
-		}
-		else {
-			LoadFile(argv[1]);
-			_image->DebugHeader();
-		}
-	}
-	else if (argc == 3) { // Debugging WriteFile();
-		LoadFile(argv[1]);
-		WriteFile(argv[2]);
-	}
-	else if (argc == 4) // Used for 1 image and another command to modify it.
-	{
+	if (option == 1)
+		Task1();
+	else if (option == 2)
+		Task2();
+	else if (option == 3)
+		Task3();
+	else if (option == 4)
+		Task4();
+	else if (option == 5)
+		Task5();
+	else if (option == 6)
+		Task6();
+	else if (option == 7)
+		Task7();
+	else if (option == 8)
+		Task8();
+	else if (option == 9)
+		Task9();
+	else if (option == 10)
+		Task10();
+	
+	//if (argc == 1) {
+	//	Multiply(argv[1], std::stoi(argv[3]), 'b');
+	//	//std::cout << "No commands provided" << std::endl;
+	//}
+	//else if (argc == 2) { // Used for help command.
+	//
+	//	if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
+	//		std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
+	//		std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
+	//	}
+	//	else {
+	//		LoadFile(argv[1]);
+	//		_image->DebugHeader();
+	//	}
+	//}
+	//else if (argc == 3) { // Debugging WriteFile();
+	//	LoadFile(argv[1]);
+	//	WriteFile(argv[2]);
+	//}
+	//else if (argc == 4) // Used for 1 image and another command to modify it.
+	//{
 
-		// Scaling the singular image's color channels.
-		if (std::strcmp(argv[2], "scaleblue") == 0) {
-			Multiply(argv[1], std::stoi(argv[3]), 'b');
-		}
-		else if (std::strcmp(argv[2], "scalegreen") == 0) {
-			Multiply(argv[1], std::stoi(argv[3]), 'g');
-		}
-		else if (std::strcmp(argv[2], "scalered") == 0) {
-			Multiply(argv[1], std::stoi(argv[3]), 'r');
-		}
-	}
+	//	// Scaling the singular image's color channels.
+	//	if (std::strcmp(argv[2], "scaleblue") == 0) {
+	//		Multiply(argv[1], std::stoi(argv[3]), 'b');
+	//	}
+	//	else if (std::strcmp(argv[2], "scalegreen") == 0) {
+	//		Multiply(argv[1], std::stoi(argv[3]), 'g');
+	//	}
+	//	else if (std::strcmp(argv[2], "scalered") == 0) {
+	//		Multiply(argv[1], std::stoi(argv[3]), 'r');
+	//	}
+
+	//	// Adding to a respective color channel.
+	//	if (std::strcmp(argv[2], "addblue") == 0) {
+	//		Add(argv[1], std::stoi(argv[3]), 'b');
+	//	}
+	//	else if (std::strcmp(argv[2], "addgreen") == 0) {
+	//		Add(argv[1], std::stoi(argv[3]), 'g');
+	//	}
+	//	else if (std::strcmp(argv[2], "addblue") == 0) {
+	//		Add(argv[1], std::stoi(argv[3]), 'b');
+	//	}
+	//}
 
 	return 0;
+}
+
+void Add(std::string _file1, int num, char channel) {
+	Image* og = LoadFile(_file1);
+
+	// Debugging the pixels.
+		std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	if (channel == 'b') {
+
+		for (unsigned char*& i : og->GetPixels()) {
+			if (static_cast<int>(i[0]) + num > 255)
+				i[0] = 255;
+			else {
+				i[0] += static_cast<int>(num);
+				i[0] = static_cast<unsigned char>(i[0]);
+			}
+		}
+	}
+	else if (channel == 'g') {
+
+		for (unsigned char*& i : og->GetPixels()) {
+			if (static_cast<int>(i[1]) + num > 255)
+				i[1] = 255;
+			else {
+				i[1] += static_cast<int>(num);
+				i[1] = static_cast<unsigned char>(i[1]);
+			}
+		}
+	}
+	else if (channel == 'r') {
+
+		for (unsigned char*& i : og->GetPixels()) {
+			if (static_cast<int>(i[2]) + num > 255)
+				i[2] = 255;
+			else {
+				i[2] += static_cast<int>(num);
+				i[2] = static_cast<unsigned char>(i[2]);
+			}
+		}
+	}
+
+	// Debugging the pixels.
+	std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	}
+}
+
+std::vector<float*> Normalize(std::vector<unsigned char*> &pixels) {
+	std::vector<float*> normal_pixels;
+	
+	for (unsigned char*& i : pixels) {
+		float* pixel = new float[3];
+		pixel[0] = (static_cast<float>(i[0]) / 255);
+		pixel[1] = (static_cast<float>(i[1]) / 255);
+		pixel[2] = (static_cast<float>(i[2]) / 255);
+		normal_pixels.push_back(pixel);
+	}
+
+	return normal_pixels;
+}
+
+void Multiply(std::string _file1, std::string _file2){
+	Image* top = LoadFile(_file1); // File 1 is the top layer.
+	Image* bottom = LoadFile(_file2); // File 2 is the bottom layer.
+
+	// Debugging the pixels.
+	std::cout << "***** IMAGE DATA FROM TOP *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < top->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(top->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(top->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(top->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	// Debugging the pixels.
+	std::cout << "***** IMAGE DATA FROM BOT *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < bottom->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(bottom->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(bottom->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(bottom->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	// First normalizing the pixels in both images.
+	std::vector<float*> top_px = Normalize(top->GetPixels());
+	std::vector<float*> bot_px = Normalize(bottom->GetPixels());
+
+	int i = 0;
+	for (unsigned char*& px : _image->GetPixels()) { // Iterating through the _image which is the output image.
+		px[0] = static_cast<char>((top_px[i][0] * bot_px[i][0]) * 255 + 0.5f); // Blue pixel
+		px[1] = static_cast<char>((top_px[i][1] * bot_px[i][1]) * 255 + 0.5f); // Green pixel
+		px[2] = static_cast<char>((top_px[i][2] * bot_px[i][2]) * 255 + 0.5f); // Red Pixel
+		++i;
+	}
+
+	std::cout << std::endl;
+	// Debugging the pixels.
+	std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 2; i < _image->GetPixels().size(); i *= 2) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(_image->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(_image->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(_image->GetPixels().at(i)[2]) << std::endl;
+	}
 }
 
 void Multiply(std::string _file1, int scale, char channel) {
@@ -227,3 +391,22 @@ Image* LoadFile(std::string _file) {
 	//}
 }
 
+
+void Task1() {
+	Multiply("layer1.tga","pattern1.tga");
+	WriteFile("part1.tga");
+}
+void Task2() {}
+void Task3() {}
+void Task4() {}
+void Task5() {}
+
+void Task6() {
+	Add("car.tga", 200, 'g');
+	WriteFile("task6.tga");
+}
+
+void Task7() {}
+void Task8() {}
+void Task9() {}
+void Task10() {}
