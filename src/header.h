@@ -88,6 +88,10 @@ public:
 		this->header->print();
 	}
 
+	Header* GetHeader() const {
+		return this->header;
+	}
+
 	std::vector<unsigned char*> GetPixels() {
 		return this->pixels;
 	}
