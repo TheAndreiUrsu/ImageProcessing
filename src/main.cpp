@@ -8,16 +8,18 @@
 Image* LoadFile(std::string _file); // loads the .tga file and returns the image.
 void WriteFile(std::string _file); // writes the .tga file.
 
-void Multiply(std::string _file1, std::string _file2); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
-void Multiply(std::string _file1, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
+Image* Multiply(std::string _file1, std::string _file2); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
+Image* Multiply(std::string _file1, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
 
 std::vector<float*> Normalize(std::vector<unsigned char*>& pixels); // Helper method for normalizing all the pixels.
 
-void Subtract(std::string _file1, std::string _file2); // Subtracts the pixels in _file1 from the pixels in _file2.
+Image* Screen(std::string _file1, Image* image);
 
-void Add(std::string _file1, int num, char channel); // Adds pixels to a certain channel. 
+Image* Subtract(std::string _file1, std::string _file2); // Subtracts the pixels in _file1 from the pixels in _file2.
 
-void Rotate(std::string _file1, int degrees); // Rotates the image in _file1 by a certain number of degrees.
+Image* Add(std::string _file1, int num, char channel); // Adds pixels to a certain channel. 
+
+Image* Rotate(std::string _file1, int degrees); // Rotates the image in _file1 by a certain number of degrees.
 
 
 void Task1();
@@ -31,14 +33,12 @@ void Task8();
 void Task9();
 void Task10();
 
-std::vector<Image> images;
-Image* _image;
-
 int main(int argc, const char** argv) {
 	int option;
 	std::cout << "Choose a task to test: (1-10)" << std::endl;
 	std::cin >> option;
 	
+	// Test Cases.
 	if (option == 1)
 		Task1();
 	else if (option == 2)
@@ -59,6 +59,9 @@ int main(int argc, const char** argv) {
 		Task9();
 	else if (option == 10)
 		Task10();
+	
+
+	// CLI
 	
 	//if (argc == 1) {
 	//	Multiply(argv[1], std::stoi(argv[3]), 'b');
@@ -108,21 +111,51 @@ int main(int argc, const char** argv) {
 	return 0;
 }
 
-void Add(std::string _file1, int num, char channel) {
-	Image* og = LoadFile(_file1);
+Image* Subtract(std::string _file1, std::string _file2) { // Subtracts pixels in file 2 from file 1.
+	
+	Image* out = LoadFile(_file1);
+	
+	std::vector<unsigned char*> bottom = LoadFile(_file2)->GetPixels();
+	std::vector<unsigned char*> top = out->GetPixels();
+	
 
-	// Debugging the pixels.
-		std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	int i = 0;
+	for (unsigned char*& px : out->GetPixels()) { // Iterating through the _image which is the output image.
+		if ((static_cast<int>(bottom[i][0]) - top[i][0] < 0))
+			px[0] = 0;
+		else
+			px[0] = static_cast<char>(bottom[i][0] - top[i][0]); // Blue pixel
+		if ((static_cast<int>(bottom[i][1]) - top[i][1] < 0))
+			px[1] = 0;
+		else
+			px[1] = static_cast<char>(bottom[i][1] - top[i][1]); // Green pixel
+		if ((static_cast<int>(bottom[i][2]) - top[i][2] < 0))
+			px[2] = 0;
+		else
+			px[2] = static_cast<char>(bottom[i][2] - top[i][2]); // Red Pixel
+		
+		++i;
 	}
+
+	return out;
+}
+
+Image* Add(std::string _file1, int num, char channel) {
+	Image* og = LoadFile(_file1);
+	Image* out = og;
+
+	//// Debugging the pixels.
+	//	std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
+
+	//for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	//}
 
 	if (channel == 'b') {
 
-		for (unsigned char*& i : og->GetPixels()) {
+		for (unsigned char*& i : out->GetPixels()) {
 			if (static_cast<int>(i[0]) + num > 255)
 				i[0] = 255;
 			else {
@@ -133,7 +166,7 @@ void Add(std::string _file1, int num, char channel) {
 	}
 	else if (channel == 'g') {
 
-		for (unsigned char*& i : og->GetPixels()) {
+		for (unsigned char*& i : out->GetPixels()) {
 			if (static_cast<int>(i[1]) + num > 255)
 				i[1] = 255;
 			else {
@@ -144,7 +177,7 @@ void Add(std::string _file1, int num, char channel) {
 	}
 	else if (channel == 'r') {
 
-		for (unsigned char*& i : og->GetPixels()) {
+		for (unsigned char*& i : out->GetPixels()) {
 			if (static_cast<int>(i[2]) + num > 255)
 				i[2] = 255;
 			else {
@@ -154,14 +187,16 @@ void Add(std::string _file1, int num, char channel) {
 		}
 	}
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
+	//// Debugging the pixels.
+	//std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
 
-	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
-	}
+	//for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	//}
+
+	return out;
 }
 
 std::vector<float*> Normalize(std::vector<unsigned char*> &pixels) {
@@ -178,69 +213,73 @@ std::vector<float*> Normalize(std::vector<unsigned char*> &pixels) {
 	return normal_pixels;
 }
 
-void Multiply(std::string _file1, std::string _file2){
+Image* Multiply(std::string _file1, std::string _file2){
 	Image* top = LoadFile(_file1); // File 1 is the top layer.
 	Image* bottom = LoadFile(_file2); // File 2 is the bottom layer.
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA FROM TOP *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
+	Image* out = top;
 
-	for (unsigned int i = 2; i < top->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(top->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(top->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(top->GetPixels().at(i)[2]) << std::endl;
-	}
+	//// Debugging the pixels.
+	//std::cout << "***** IMAGE DATA FROM TOP *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA FROM BOT *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
+	//for (unsigned int i = 2; i < top->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(top->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(top->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(top->GetPixels().at(i)[2]) << std::endl;
+	//}
 
-	for (unsigned int i = 2; i < bottom->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(bottom->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(bottom->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(bottom->GetPixels().at(i)[2]) << std::endl;
-	}
+	//// Debugging the pixels.
+	//std::cout << "***** IMAGE DATA FROM BOT *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
+
+	//for (unsigned int i = 2; i < bottom->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(bottom->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(bottom->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(bottom->GetPixels().at(i)[2]) << std::endl;
+	//}
 
 	// First normalizing the pixels in both images.
 	std::vector<float*> top_px = Normalize(top->GetPixels());
 	std::vector<float*> bot_px = Normalize(bottom->GetPixels());
 
 	int i = 0;
-	for (unsigned char*& px : _image->GetPixels()) { // Iterating through the _image which is the output image.
+	for (unsigned char*& px : out->GetPixels()) { // Iterating through the _image which is the output image.
 		px[0] = static_cast<char>((top_px[i][0] * bot_px[i][0]) * 255 + 0.5f); // Blue pixel
 		px[1] = static_cast<char>((top_px[i][1] * bot_px[i][1]) * 255 + 0.5f); // Green pixel
 		px[2] = static_cast<char>((top_px[i][2] * bot_px[i][2]) * 255 + 0.5f); // Red Pixel
 		++i;
 	}
 
-	std::cout << std::endl;
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
+	//std::cout << std::endl;
+	//// Debugging the pixels.
+	//std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
 
-	for (unsigned int i = 2; i < _image->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(_image->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(_image->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(_image->GetPixels().at(i)[2]) << std::endl;
-	}
+	//for (unsigned int i = 2; i < _image->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(_image->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(_image->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(_image->GetPixels().at(i)[2]) << std::endl;
+	//}
+	return out;
 }
 
-void Multiply(std::string _file1, int scale, char channel) {
+Image* Multiply(std::string _file1, int scale, char channel) {
 	Image* og = LoadFile(_file1);
+	Image* out = og;
 
 	float normal = 0.0f; // calculates and stores the normalized channel value.
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
+	//// Debugging the pixels.
+	//std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
 
-	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
-	}
+	//for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	//}
 
 	// Multiplying a pixel example.
 	if (channel == 'b') {
 
-		for (unsigned char*& i : og->GetPixels()) { // For each uses an iterator to quickly change every pixel in this 512x512 image. Source: https://www.geeksforgeeks.org/g-fact-40-foreach-in-c-and-java/ : cutting down from 4 minutes to 1.56 seconds.
+		for (unsigned char*& i : out->GetPixels()) { // For each uses an iterator to quickly change every pixel in this 512x512 image. Source: https://www.geeksforgeeks.org/g-fact-40-foreach-in-c-and-java/ : cutting down from 4 minutes to 1.56 seconds.
 			// i is the dynamic array containing the b,g,r values of the pixel.
 			// the b value is accessed through i[0]. 
 			normal = (static_cast<float>((i[0])) / 255) * scale * 255 + 0.5f;
@@ -250,7 +289,7 @@ void Multiply(std::string _file1, int scale, char channel) {
 	}
 	else if (channel == 'g') {
 
-		for (unsigned char*& i : og->GetPixels()) { 
+		for (unsigned char*& i : out->GetPixels()) { 
 			// i is the dynamic array containing the b,g,r values of the pixel.
 			// the g value is accessed through i[1]. 
 			normal = (static_cast<float>((i[1])) / 255) * scale * 255 + 0.5f;
@@ -259,7 +298,7 @@ void Multiply(std::string _file1, int scale, char channel) {
 	}
 	else if (channel == 'r') {
 
-		for (unsigned char*& i : og->GetPixels()) { // For each uses an iterator to quickly change every pixel in this 512x512 image. Source: https://www.geeksforgeeks.org/g-fact-40-foreach-in-c-and-java/ : cutting down from 4 minutes to 1.56 seconds.
+		for (unsigned char*& i : out->GetPixels()) { // For each uses an iterator to quickly change every pixel in this 512x512 image. Source: https://www.geeksforgeeks.org/g-fact-40-foreach-in-c-and-java/ : cutting down from 4 minutes to 1.56 seconds.
 			// i is the dynamic array containing the b,g,r values of the pixel.
 			// the r value is accessed through i[2]. 
 			normal = (static_cast<float>((i[2])) / 255) * scale * 255 + 0.5f;
@@ -267,19 +306,19 @@ void Multiply(std::string _file1, int scale, char channel) {
 		}
 	}
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
+	//// Debugging the pixels.
+	//std::cout << "***** IMAGE DATA AFTER MULTIPLYING *****" << std::endl;
+	//std::cout << "-----------------------" << std::endl << std::endl;
 
-	for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
-	}
-
+	//for (unsigned int i = 2; i < og->GetPixels().size(); i *= 2) {
+	//	std::cout << "PIXEL " << i << ": " << std::endl;
+	//	std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
+	//}
+	return out;
 
 }
 
-void WriteFile(std::string _file) {
+void WriteFile(std::string _file, Image* _image) {
 	// Testing writing, by changing the first pixel.
 	std::ofstream file("output/" + _file, std::ios_base::out | std::ios_base::binary);
 	
@@ -319,6 +358,8 @@ void WriteFile(std::string _file) {
 Image* LoadFile(std::string _file) {
 	std::vector<unsigned char*> pixels; // Stores all the pixels in the image, each entry has a dynamic array of 3 b g r pixels, representing the color.
 	std::ifstream file("input/" + _file, std::ios_base::binary);
+	Image* out;
+	
 	std::cout << "Beginning to open file: " << _file << std::endl << std::endl;
 
 	if (!file.is_open()) { // Handling file can't open.
@@ -380,10 +421,10 @@ Image* LoadFile(std::string _file) {
 		pixels.push_back(bgr_pixel); // 1 Pixel
 	}
 
-	_image = new Image(pixels, id_len, color_map_type, image_type, color_map_origin, color_map_length, color_map_depth, x_origin, y_origin, width, height, pixel_depth, image_descriptor);
+	out = new Image(pixels, id_len, color_map_type, image_type, color_map_origin, color_map_length, color_map_depth, x_origin, y_origin, width, height, pixel_depth, image_descriptor);
 
 	file.close();
-	return _image;
+	return out;
 
 	//// Memory deallocation.
 	//for (unsigned int i = 0; i < pixels.size(); i++) {
@@ -393,17 +434,17 @@ Image* LoadFile(std::string _file) {
 
 
 void Task1() {
-	Multiply("layer1.tga","pattern1.tga");
-	WriteFile("part1.tga");
+	WriteFile("part1.tga", Multiply("layer1.tga", "pattern1.tga"));
 }
-void Task2() {}
+void Task2() {
+	WriteFile("part2.tga", Subtract("layer2.tga", "car.tga"));
+}
 void Task3() {}
 void Task4() {}
 void Task5() {}
 
 void Task6() {
-	Add("car.tga", 200, 'g');
-	WriteFile("task6.tga");
+	WriteFile("part6.tga", Add("car.tga", 200, 'g'));
 }
 
 void Task7() {}
