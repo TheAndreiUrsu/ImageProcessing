@@ -37,6 +37,10 @@ int main(int argc, const char** argv) {
 			_image->DebugHeader();
 		}
 	}
+	else if (argc == 3) { // Debugging WriteFile();
+		LoadFile(argv[1]);
+		WriteFile(argv[2]);
+	}
 	else if (argc == 4) // Used for 1 image and another command to modify it.
 	{
 
@@ -113,13 +117,39 @@ void Multiply(std::string _file1, int scale, char channel) {
 
 void WriteFile(std::string _file) {
 	// Testing writing, by changing the first pixel.
-	std::ofstream file("input/" + _file, std::ios_base::out | std::ios_base::binary);
-	if (file.is_open()) {
-		file.seekp(19); // Used for writing to the image, the image data starts at the 19th byte.
-		file.write(reinterpret_cast<char*>(0), sizeof(0));
-		file.write(reinterpret_cast<char*>(0), sizeof(0));
-		file.write(reinterpret_cast<char*>(0), sizeof(0));
+	std::ofstream file("output/" + _file, std::ios_base::out | std::ios_base::binary);
+	
+	if (!file.is_open()) { // Handling file can't open.
+		std::cout << "Can't create: " << _file << " !" << std::endl;
 	}
+	
+	// Header
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->idLen), 1); // Writing the ID_LEN
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->hasColorMap), 1); // Writing the COLOR_MAP_TYPE
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->imageType), 1); // Writing the IMAGE_TYPE
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->colorMapOrigin), 2); // Writing the COLOR_MAP_ORIGIN
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->colorMapLen), 2); // Writing the COLOR_MAP_LEN
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->colorMapDepth), 1); // Writing the COLOR_MAP_DEPTH
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->xOrigin), 2); // Writing the X_ORIGIN
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->yOrigin), 2); // Writing the Y_ORIGIN
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->width), 2); // Writing the Image WIDTH
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->height), 2); // Writing the Image HEIGHT
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->bitsPerPixel), 1); // Writing the PIXEL_DEPTH
+	file.write(reinterpret_cast<char*>(&_image->GetHeader()->imageDescriptor), 1); // Writing the IMAGE_DESCRIPTOR
+
+	// Pixels
+	std::vector<unsigned char*> temp = _image->GetPixels();
+
+	for (unsigned char*& i : temp) {
+		file.write(reinterpret_cast<char*>(&i[0]), 1); // Writing the blue pixel
+		file.write(reinterpret_cast<char*>(&i[1]), 1); // Writing the red pixel
+		file.write(reinterpret_cast<char*>(&i[2]), 1); // Writing the green pixel
+	}
+
+	_image->DebugHeader();
+
+	
+	file.close();
 }
 
 Image* LoadFile(std::string _file) {
