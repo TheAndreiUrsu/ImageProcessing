@@ -492,6 +492,32 @@ void Task7() { // Bug
 
 	WriteFile("part7.tga", image);
 }
-void Task8() {}
+void Task8() {
+	// Load separate times.
+	Image* red = LoadFile("car.tga");
+	Image* green = LoadFile("car.tga");
+	Image* blue = LoadFile("car.tga");
+
+	// Iterate through the pixels, to create a grayscale image based on red.
+	for (unsigned char*& px : red->GetPixels()) {
+		px[0] = px[2];
+		px[1] = px[2];
+	}
+	// Iterate through the pixels, to create a grayscale image based on green.
+	for (unsigned char*& px : green->GetPixels()) {
+		px[0] = px[1];
+		px[2] = px[1];
+	}
+	// Iterate through the pixels, to create a grayscale image based on blue.
+	for (unsigned char*& px : blue->GetPixels()) {
+		px[1] = px[0];
+		px[2] = px[0];
+	}
+
+	// Write the files.
+	WriteFile("part8_r.tga", red);
+	WriteFile("part8_g.tga", green);
+	WriteFile("part8_b.tga", blue);
+}
 void Task9() {}
 void Task10() {}
