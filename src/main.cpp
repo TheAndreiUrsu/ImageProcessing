@@ -8,19 +8,18 @@
 Image* LoadFile(std::string _file); // loads the .tga file and returns the image.
 void WriteFile(std::string _file); // writes the .tga file.
 
-Image* Multiply(std::string _file1, std::string _file2); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
-Image* Multiply(std::string _file1, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
+Image* Multiply(Image* _top, Image* _bottom); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
+Image* Multiply(Image* image, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
 
 std::vector<float*> Normalize(std::vector<unsigned char*>& pixels); // Helper method for normalizing all the pixels.
 
-Image* Screen(std::string _file1, Image* image);
+Image* Screen(Image* _top, Image* _bottom);
 
-Image* Subtract(std::string _file1, std::string _file2); // Subtracts the pixels in _file1 from the pixels in _file2.
+Image* Subtract(Image* _top, Image* _bottom); // Subtracts the pixels in top image from the pixels in the bottom image.
 
-Image* Add(std::string _file1, int num, char channel); // Adds pixels to a certain channel. 
+Image* Add(Image* image, int num, char channel); // Adds pixels to a certain channel. 
 
-Image* Rotate(std::string _file1, int degrees); // Rotates the image in _file1 by a certain number of degrees.
-
+Image* Rotate(Image* image, int degrees); // Rotates the image in _file1 by a certain number of degrees.
 
 void Task1();
 void Task2();
@@ -111,14 +110,13 @@ int main(int argc, const char** argv) {
 	return 0;
 }
 
-Image* Subtract(std::string _file1, std::string _file2) { // Subtracts pixels in file 2 from file 1.
+Image* Subtract(Image* _top, Image* _bottom) { // Subtracts pixels in file 2 from file 1.
 	
-	Image* out = LoadFile(_file1);
+	Image* out = _top;
 	
-	std::vector<unsigned char*> bottom = LoadFile(_file2)->GetPixels();
+	std::vector<unsigned char*> bottom = _bottom->GetPixels();
 	std::vector<unsigned char*> top = out->GetPixels();
 	
-
 	int i = 0;
 	for (unsigned char*& px : out->GetPixels()) { // Iterating through the _image which is the output image.
 		if ((static_cast<int>(bottom[i][0]) - top[i][0] < 0))
@@ -213,11 +211,9 @@ std::vector<float*> Normalize(std::vector<unsigned char*> &pixels) {
 	return normal_pixels;
 }
 
-Image* Multiply(std::string _file1, std::string _file2){
-	Image* top = LoadFile(_file1); // File 1 is the top layer.
-	Image* bottom = LoadFile(_file2); // File 2 is the bottom layer.
+Image* Multiply(Image* _top, Image* _bottom){
 
-	Image* out = top;
+	Image* out = _top;
 
 	//// Debugging the pixels.
 	//std::cout << "***** IMAGE DATA FROM TOP *****" << std::endl;
@@ -238,8 +234,8 @@ Image* Multiply(std::string _file1, std::string _file2){
 	//}
 
 	// First normalizing the pixels in both images.
-	std::vector<float*> top_px = Normalize(top->GetPixels());
-	std::vector<float*> bot_px = Normalize(bottom->GetPixels());
+	std::vector<float*> top_px = Normalize(_top->GetPixels());
+	std::vector<float*> bot_px = Normalize(_bottom->GetPixels());
 
 	int i = 0;
 	for (unsigned char*& px : out->GetPixels()) { // Iterating through the _image which is the output image.
@@ -261,9 +257,8 @@ Image* Multiply(std::string _file1, std::string _file2){
 	return out;
 }
 
-Image* Multiply(std::string _file1, int scale, char channel) {
-	Image* og = LoadFile(_file1);
-	Image* out = og;
+Image* Multiply(Image* image, int scale, char channel) {
+	Image* out = image;
 
 	float normal = 0.0f; // calculates and stores the normalized channel value.
 
@@ -316,6 +311,35 @@ Image* Multiply(std::string _file1, int scale, char channel) {
 	//}
 	return out;
 
+}
+
+Image* Screen(Image* top, Image* bottom) {
+	std::vector<float*> P1 = Normalize(top->GetPixels());
+	std::vector<float*> P2 = Normalize(bottom->GetPixels());
+
+	int i = 0;
+	for (unsigned char*& px : bottom->GetPixels()) {
+		float* pixel = new float[3];
+		
+		pixel[0] = (1 - P1[i][0]) * (1 - P2[i][0]); // Blue channel.
+		pixel[0] = 1 - pixel[0];
+		pixel[0] = pixel[0] * 255 + 0.5f;
+		px[0] = static_cast<unsigned char>(pixel[0]);
+
+		pixel[1] = (1 - P1[i][1]) * (1 - P2[i][1]); // Green channel.
+		pixel[1] = 1 - pixel[1];
+		pixel[1] = pixel[1] * 255 + 0.5f;
+		px[1] = static_cast<unsigned char>(pixel[1]);
+
+		pixel[2] = (1 - P1[i][2]) * (1 - P2[i][2]); // Red channel.
+		pixel[2] = 1 - pixel[2];
+		pixel[2] = pixel[2] * 255 + 0.5f;
+		px[2] = static_cast<unsigned char>(pixel[2]);
+
+		++i;
+	}
+
+	return bottom;
 }
 
 void WriteFile(std::string _file, Image* _image) {
@@ -434,13 +458,31 @@ Image* LoadFile(std::string _file) {
 
 
 void Task1() {
-	WriteFile("part1.tga", Multiply("layer1.tga", "pattern1.tga"));
+	Image* L1 = LoadFile("layer1.tga");
+	Image* L2 = LoadFile("pattern1.tga");
+	WriteFile("part1.tga", Multiply(L1, L2));
 }
 void Task2() {
-	WriteFile("part2.tga", Subtract("layer2.tga", "car.tga"));
+	Image* Top = LoadFile("layer2.tga");
+	Image* Bot = LoadFile("car.tga");
+	WriteFile("part2.tga", Subtract(Top, Bot));
 }
-void Task3() {}
-void Task4() {}
+void Task3() {
+	Image* I1 = LoadFile("layer1.tga");
+	Image* I2 = LoadFile("pattern2.tga");
+	Image* out = Multiply(I1, I2);
+	Image* TEXT = LoadFile("text.tga");
+
+	WriteFile("part3.tga", Screen(TEXT, out));
+}
+void Task4() {
+	Image* I1 = LoadFile("layer2.tga");
+	Image* I2 = LoadFile("circles.tga");
+	Image* out = Multiply(I1, I2);
+	Image* I3 = LoadFile("pattern2.tga");
+
+	WriteFile("part4.tga", Subtract(I3,out));
+}
 void Task5() {}
 
 void Task6() {
