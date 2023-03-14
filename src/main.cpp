@@ -19,6 +19,8 @@ Image* Subtract(Image* _top, Image* _bottom); // Subtracts the pixels in top ima
 
 Image* Add(Image* image, int num, char channel); // Adds pixels to a certain channel. 
 
+Image* Overlay(Image* I1, Image* I2);
+
 Image* Rotate(Image* image, int degrees); // Rotates the image in _file1 by a certain number of degrees.
 
 void Task1();
@@ -138,9 +140,8 @@ Image* Subtract(Image* _top, Image* _bottom) { // Subtracts pixels in file 2 fro
 	return out;
 }
 
-Image* Add(std::string _file1, int num, char channel) {
-	Image* og = LoadFile(_file1);
-	Image* out = og;
+Image* Add(Image* image , int num, char channel) {
+	Image* out = image;
 
 	//// Debugging the pixels.
 	//	std::cout << "***** IMAGE DATA BEFORE MULTIPLYING *****" << std::endl;
@@ -194,6 +195,45 @@ Image* Add(std::string _file1, int num, char channel) {
 	//	std::cout << "B: " << static_cast<int>(og->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(og->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(og->GetPixels().at(i)[2]) << std::endl;
 	//}
 
+	return out;
+}
+
+Image* Overlay(Image* I1, Image* I2) {
+	Image* out = I1;
+
+	std::vector<float*> I1_Norm = Normalize(I1->GetPixels());
+	std::vector<float*> I2_Norm = Normalize(I2->GetPixels());
+
+	int i = 0;
+
+	for (unsigned char*& px : out->GetPixels()) {
+
+		// Blue channels.
+		if(I2_Norm[i][0] <= 0.5){
+			px[0] = static_cast<unsigned char>((2 * I2_Norm[i][0] * I1_Norm[i][0]) * 255 + 0.5f);
+		}
+		else if (I2_Norm[i][0] > 0.5) {
+			px[0] = static_cast<unsigned char>(1 - (2 * (1 - I1_Norm[i][0]) * (1 - I2_Norm[i][0])) * 255 + 0.5f);
+		}
+
+		// Green channels.
+		if (I2_Norm[i][1] <= 0.5) {
+			px[1] = static_cast<unsigned char>((2 * I2_Norm[i][1] * I1_Norm[i][1]) * 255 + 0.5f);
+		}
+		else if (I2_Norm[i][1] > 0.5) {
+			px[1] = static_cast<unsigned char>(1 - (2 * (1 - I1_Norm[i][1]) * (1 - I2_Norm[i][1])) * 255 + 0.5f);
+		}
+
+		// Red channels.
+		if (I2_Norm[i][2] <= 0.5) {
+			px[2] = static_cast<unsigned char>((2 * I2_Norm[i][2] * I1_Norm[i][2]) * 255 + 0.5f);
+		}
+		else if (I2_Norm[i][2] > 0.5) {
+			px[2] = static_cast<unsigned char>(1 - (2 * (1 - I1_Norm[i][2]) * (1 - I2_Norm[i][2])) * 255 + 0.5f);
+		}
+
+		++i;
+	}
 	return out;
 }
 
@@ -456,7 +496,6 @@ Image* LoadFile(std::string _file) {
 	//}
 }
 
-
 void Task1() {
 	Image* L1 = LoadFile("layer1.tga");
 	Image* L2 = LoadFile("pattern1.tga");
@@ -483,10 +522,16 @@ void Task4() {
 
 	WriteFile("part4.tga", Subtract(I3,out));
 }
-void Task5() {}
+void Task5() {
+	Image* I1 = LoadFile("layer1.tga");
+	Image* I2 = LoadFile("pattern1.tga");
+
+	WriteFile("part5.tga", Overlay(I1, I2));
+}
 
 void Task6() {
-	WriteFile("part6.tga", Add("car.tga", 200, 'g'));
+	Image* image = LoadFile("car.tga");
+	WriteFile("part6.tga", Add(image, 200, 'g'));
 }
 
 void Task7() {}
