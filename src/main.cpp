@@ -18,6 +18,7 @@ Image* Screen(Image* _top, Image* _bottom);
 Image* Subtract(Image* _top, Image* _bottom); // Subtracts the pixels in top image from the pixels in the bottom image.
 
 Image* Add(Image* image, int num, char channel); // Adds pixels to a certain channel. 
+Image* Add(Image* I1, Image* I2); // Combines 2 images.
 
 Image* Overlay(Image* I1, Image* I2);
 
@@ -38,14 +39,14 @@ int main(int argc, const char** argv) {
 	/*int option;
 	std::cout << "Choose a task to test: (1-10)" << std::endl;
 	std::cin >> option;*/
-	/*Task1();
+	Task1();
 	Task2();
 	Task3();
-	Task4();*/
+	Task4();
 	Task5();
-	/*Task6();
+	Task6();
 	Task7();
-	Task8();*/
+	Task8();
 	// Test Cases.
 	/*if (option == 1)
 		Task1();
@@ -187,32 +188,43 @@ Image* Add(Image* image , int num, char channel) {
 	return out;
 }
 
+Image* Add(Image* I1, Image* I2) {
+	Image* out = I1;
+
+	int i = 0;
+
+	for (unsigned char*& px : out->GetPixels()) {
+		// Blue channels.
+		if (static_cast<int>(px[0]) + I2->GetPixels()[i][0] > 255)
+			px[0] = 255;
+		else {
+			px[0] += static_cast<int>(I2->GetPixels()[i][0]);
+		}
+
+		// Green channels.
+		if (static_cast<int>(px[1]) + I2->GetPixels()[i][1] > 255)
+			px[1] = 255;
+		else {
+			px[1] += static_cast<int>(I2->GetPixels()[i][1]);
+		}
+
+		// Red channels.
+		if (static_cast<int>(px[2]) + I2->GetPixels()[i][2] > 255)
+			px[2] = 255;
+		else {
+			px[2] += static_cast<int>(I2->GetPixels()[i][2]);
+		}
+
+		++i;
+	}
+	return out;
+}
+
 Image* Overlay(Image* I1, Image* I2) {
 	Image* out = I1;
 
 	std::vector<float*> I1_Norm = Normalize(I1->GetPixels());
 	std::vector<float*> I2_Norm = Normalize(I2->GetPixels());
-
-	std::cout << "\n I1.";
-	for (int i = 2; i < out->GetPixels().size(); i *= 2) {
-		std::cout << "\n Pixel " << i << ":\n(" << (int)out->GetPixels()[i][0] << ", " << (int)out->GetPixels()[i][1] << ", " << (int)out->GetPixels()[i][2] << ")\n";
-	}
-	std::cout << "\n I2 px.";
-	for (int i = 2; i < I2->GetPixels().size(); i *= 2) {
-		std::cout << "\n Pixel " << i << ":\n(" << (int)I2->GetPixels()[i][0] << ", " << (int)I2->GetPixels()[i][1] << ", " << (int)I2->GetPixels()[i][2] << ")\n";
-	}
-
-	/*std::cout << "\nnorm px.";
-	for (int i = 2; i <I1_Norm.size(); i *= 2) {
-		if (I2_Norm[i][0] <= 0.5) {
-			std::cout << "Do 2 * NP1 * NP2" << std::endl;
-		}
-		else if (I2_Norm[i][0] > 0.5) {
-			std::cout << "Do 1 - [2 * (1 - NP1) * (1 - NP2)]" << std::endl;
-		}
-		std::cout << "\n Pixel " << i << ":\n(" << I1_Norm[i][0] << ", " << I1_Norm[i][1] << ", " << I1_Norm[i][2] << ")\n";
-	}*/
-
 
 	int i = 0;
 
@@ -245,10 +257,6 @@ Image* Overlay(Image* I1, Image* I2) {
 		++i;
 	}
 
-	std::cout << "\n Out px.";
-	for (int i = 2; i < out->GetPixels().size(); i *= 2) {
-		std::cout << "\n Pixel " << i << ":\n(" << (float)out->GetPixels()[i][0] << ", " << (float)out->GetPixels()[i][1] << ", " << (float)out->GetPixels()[i][2] << ")\n";
-	}
 	return out;
 }
 
@@ -297,7 +305,11 @@ Image* Multiply(Image* image, int scale, char channel) {
 			// i is the dynamic array containing the b,g,r values of the pixel.
 			// the b value is accessed through i[0]. 
 			normal = (static_cast<float>((i[0])) / 255) * scale * 255 + 0.5f;
-			i[0] = static_cast<unsigned char>(normal);
+			
+			if (normal > 255) // Checking for overflow.
+				i[0] = 255;
+			else
+				i[0] = static_cast<unsigned char>(normal);
 		}
 		
 	}
@@ -307,7 +319,11 @@ Image* Multiply(Image* image, int scale, char channel) {
 			// i is the dynamic array containing the b,g,r values of the pixel.
 			// the g value is accessed through i[1]. 
 			normal = (static_cast<float>((i[1])) / 255) * scale * 255 + 0.5f;
-			i[1] = static_cast<unsigned char>(normal);
+			
+			if (normal > 255) // Checking for overflow.
+				i[1] = 255;
+			else
+				i[1] = static_cast<unsigned char>(normal);
 		}
 	}
 	else if (channel == 'r') {
@@ -316,9 +332,15 @@ Image* Multiply(Image* image, int scale, char channel) {
 			// i is the dynamic array containing the b,g,r values of the pixel.
 			// the r value is accessed through i[2]. 
 			normal = (static_cast<float>((i[2])) / 255) * scale * 255 + 0.5f;
-			i[2] = static_cast<unsigned char>(normal);
+			
+			if (normal > 255) // Checking for overflow.
+				i[2] = 255;
+			else
+				i[2] = static_cast<unsigned char>(normal);
 		}
 	}
+
+
 	return out;
 }
 
@@ -383,7 +405,6 @@ void WriteFile(std::string _file, Image* _image) {
 	}
 
 	_image->DebugHeader();
-
 	
 	file.close();
 }
@@ -491,7 +512,7 @@ void Task4() {
 
 	WriteFile("part4.tga", Subtract(I3,out));
 }
-void Task5() { // Bug
+void Task5() {
 	Image* I1 = LoadFile("layer1.tga");
 	Image* I2 = LoadFile("pattern1.tga");
 
@@ -501,27 +522,11 @@ void Task6() {
 	Image* image = LoadFile("car.tga");
 	WriteFile("part6.tga", Add(image, 200, 'g'));
 }
-void Task7() { // Bug
+void Task7() {
 	Image* image = LoadFile("car.tga");
 
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA FROM OG *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (unsigned int i = 2; i < image->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(image->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(image->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(image->GetPixels().at(i)[2]) << std::endl;
-	}
 	image = Multiply(image, 4, 'r');
 	image = Multiply(image, 0, 'b');
-	// Debugging the pixels.
-	std::cout << "***** IMAGE DATA FROM Update *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (unsigned int i = 2; i < image->GetPixels().size(); i *= 2) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(image->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(image->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(image->GetPixels().at(i)[2]) << std::endl;
-	}
 
 	WriteFile("part7.tga", image);
 }
