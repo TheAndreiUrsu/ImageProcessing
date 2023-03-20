@@ -22,8 +22,6 @@ Image* Add(Image* image, char channel);
 
 Image* Overlay(Image* I1, Image* I2);
 
-Image* Rotate(Image* image, int degrees); // Rotates the image in _file1 by a certain number of degrees.
-
 void Task1();
 void Task2();
 void Task3();
@@ -36,9 +34,6 @@ void Task9();
 void Task10();
 
 int main(int argc, const char** argv) {
-	/*int option;
-	std::cout << "Choose a task to test: (1-10)" << std::endl;
-	std::cin >> option;*/
 	/*Task1();
 	Task2();
 	Task3();
@@ -46,77 +41,29 @@ int main(int argc, const char** argv) {
 	Task5();
 	Task6();
 	Task7();
-	Task8();*/
+	Task8();
 	Task9();
-	// Test Cases.
-	/*if (option == 1)
-		Task1();
-	else if (option == 2)
-		Task2();
-	else if (option == 3)
-		Task3();
-	else if (option == 4)
-		Task4();
-	else if (option == 5)
-		Task5();
-	else if (option == 6)
-		Task6();
-	else if (option == 7)
-		Task7();
-	else if (option == 8)
-		Task8();
-	else if (option == 9)
-		Task9();
-	else if (option == 10)
-		Task10();*/
-	
+	Task10();*/
 
 	// CLI
 	
-	//if (argc == 1) {
-	//	Multiply(argv[1], std::stoi(argv[3]), 'b');
-	//	//std::cout << "No commands provided" << std::endl;
-	//}
-	//else if (argc == 2) { // Used for help command.
-	//
-	//	if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
-	//		std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
-	//		std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
-	//	}
-	//	else {
-	//		LoadFile(argv[1]);
-	//		_image->DebugHeader();
-	//	}
-	//}
-	//else if (argc == 3) { // Debugging WriteFile();
-	//	LoadFile(argv[1]);
-	//	WriteFile(argv[2]);
-	//}
-	//else if (argc == 4) // Used for 1 image and another command to modify it.
-	//{
+	if (argc == 1) {
+		std::cout << "No commands provided" << std::endl;
+	}
+	else if (argc == 2) { // Used for help command.
+	
+		if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
+			std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
+			std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
+		}
+	}
+	else if (argc == 3) { 
 
-	//	// Scaling the singular image's color channels.
-	//	if (std::strcmp(argv[2], "scaleblue") == 0) {
-	//		Multiply(argv[1], std::stoi(argv[3]), 'b');
-	//	}
-	//	else if (std::strcmp(argv[2], "scalegreen") == 0) {
-	//		Multiply(argv[1], std::stoi(argv[3]), 'g');
-	//	}
-	//	else if (std::strcmp(argv[2], "scalered") == 0) {
-	//		Multiply(argv[1], std::stoi(argv[3]), 'r');
-	//	}
+	}
+	else if (argc == 4) // Used for 1 image and another command to modify it.
+	{
 
-	//	// Adding to a respective color channel.
-	//	if (std::strcmp(argv[2], "addblue") == 0) {
-	//		Add(argv[1], std::stoi(argv[3]), 'b');
-	//	}
-	//	else if (std::strcmp(argv[2], "addgreen") == 0) {
-	//		Add(argv[1], std::stoi(argv[3]), 'g');
-	//	}
-	//	else if (std::strcmp(argv[2], "addblue") == 0) {
-	//		Add(argv[1], std::stoi(argv[3]), 'b');
-	//	}
-	//}
+	}
 
 	return 0;
 }
@@ -491,11 +438,23 @@ void Task1() {
 	Image* L1 = LoadFile("layer1.tga");
 	Image* L2 = LoadFile("pattern1.tga");
 	WriteFile("part1.tga", Multiply(L1, L2));
+
+	// Erasing from heap.
+	for (unsigned char*& px : L1->GetPixels())
+		delete px;
+	for (unsigned char*& px : L2->GetPixels())
+		delete px;
 }
 void Task2() {
 	Image* Top = LoadFile("layer2.tga");
 	Image* Bot = LoadFile("car.tga");
 	WriteFile("part2.tga", Subtract(Top, Bot));
+
+	// Erasing from heap.
+	for (unsigned char*& px : Top->GetPixels())
+		delete px;
+	for (unsigned char*& px : Bot->GetPixels())
+		delete px;
 }
 void Task3() {
 	Image* I1 = LoadFile("layer1.tga");
@@ -504,6 +463,14 @@ void Task3() {
 	Image* TEXT = LoadFile("text.tga");
 
 	WriteFile("part3.tga", Screen(TEXT, out));
+
+	// Erasing from heap.
+	for (unsigned char*& px : I1->GetPixels())
+		delete px;
+	for (unsigned char*& px : I2->GetPixels())
+		delete px;
+	for (unsigned char*& px : TEXT->GetPixels())
+		delete px;
 }
 void Task4() {
 	Image* I1 = LoadFile("layer2.tga");
@@ -512,16 +479,34 @@ void Task4() {
 	Image* I3 = LoadFile("pattern2.tga");
 
 	WriteFile("part4.tga", Subtract(I3,out));
+
+	// Erasing from heap.
+	for (unsigned char*& px : I1->GetPixels())
+		delete px;
+	for (unsigned char*& px : I2->GetPixels())
+		delete px;
+	for (unsigned char*& px : I3->GetPixels())
+		delete px;
 }
 void Task5() {
 	Image* I1 = LoadFile("layer1.tga");
 	Image* I2 = LoadFile("pattern1.tga");
 
 	WriteFile("part5.tga", Overlay(I1, I2));
+
+	// Erasing from heap.
+	for (unsigned char*& px : I1->GetPixels())
+		delete px;
+	for (unsigned char*& px : I2->GetPixels())
+		delete px;
 }
 void Task6() {
 	Image* image = LoadFile("car.tga");
 	WriteFile("part6.tga", Add(image, 200, 'g'));
+
+	// Erasing from heap.
+	for (unsigned char*& px : image->GetPixels())
+		delete px;
 }
 void Task7() {
 	Image* image = LoadFile("car.tga");
@@ -530,6 +515,10 @@ void Task7() {
 	image = Multiply(image, 0, 'b');
 
 	WriteFile("part7.tga", image);
+
+	// Erasing from heap.
+	for (unsigned char*& px : image->GetPixels())
+		delete px;
 }
 void Task8() {
 	// Load separate times.
@@ -557,6 +546,14 @@ void Task8() {
 	WriteFile("part8_r.tga", red);
 	WriteFile("part8_g.tga", green);
 	WriteFile("part8_b.tga", blue);
+
+	// Erasing from heap.
+	for (unsigned char*& px : red->GetPixels())
+		delete px;
+	for (unsigned char*& px : green->GetPixels())
+		delete px;
+	for (unsigned char*& px : blue->GetPixels())
+		delete px;
 }
 void Task9() {
 	Image* red = LoadFile("layer_red.tga");
@@ -570,5 +567,35 @@ void Task9() {
 	res = Add(res, blue, 'b');
 
 	WriteFile("part9.tga", res);
+
+	// Erasing from heap.
+	for (unsigned char*& px : red->GetPixels())
+		delete px;
+	for (unsigned char*& px : green->GetPixels())
+		delete px;
+	for (unsigned char*& px : blue->GetPixels())
+		delete px;
+	for (unsigned char*& px : res->GetPixels())
+		delete px;
 }
-void Task10() {}
+void Task10() {
+	Image* image = LoadFile("text2.tga");
+	Image* out = LoadFile("text2.tga");
+
+	int i = image->GetPixels().size() - 1;
+	for (unsigned char*& px : out->GetPixels()) {
+		px[0] = image->GetPixels()[i][0];
+		px[1] = image->GetPixels()[i][1];
+		px[2] = image->GetPixels()[i][2];
+
+		--i;
+	}
+
+	WriteFile("part10.tga", out);
+
+	// Erasing from heap.
+	for (unsigned char*& px : image->GetPixels())
+		delete px;
+	for (unsigned char*& px : out->GetPixels())
+		delete px;
+}
