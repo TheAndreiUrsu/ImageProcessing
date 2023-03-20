@@ -45,10 +45,12 @@ int main(int argc, const char** argv) {
 	Task9();
 	Task10();*/
 
+	std::vector<const char*> methods = { "combine","screen","multiply","subtract","overlay","addred","addgreen","addblue","scalered","scalegreen","scaleblue","onlyred","onlygreen","onlyblue","flip" };
+
 	// CLI
 	
 	if (argc == 1) {
-		std::cout << "No commands provided" << std::endl;
+		std::cout << "You didn't pass any arguments!" << std::endl;
 	}
 	else if (argc == 2) { // Used for help command.
 	
@@ -56,13 +58,25 @@ int main(int argc, const char** argv) {
 			std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
 			std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
 		}
+		else{
+			std::cout << "Invalid file name." << std::endl;
+		}
 	}
-	else if (argc == 3) { 
+	else if (argc > 2) {
 
-	}
-	else if (argc == 4) // Used for 1 image and another command to modify it.
-	{
+		if (argc == 3)
+			std::cout << "No method provided!" << std::endl;
+		else {
+			size_t ext = static_cast<std::string>(argv[1]).find(".tga");
+			if (ext == std::string::npos)
+				std::cout << "Invalid file name." << std::endl;
+			ext = static_cast<std::string>(argv[2]).find(".tga");
+			if (ext == std::string::npos)
+				std::cout << "Invalid file name." << std::endl;
+		}
 
+		
+		
 	}
 
 	return 0;
