@@ -18,7 +18,7 @@ Image* Screen(Image* _top, Image* _bottom);
 Image* Subtract(Image* _top, Image* _bottom); // Subtracts the pixels in top image from the pixels in the bottom image.
 
 Image* Add(Image* image, int num, char channel); // Adds pixels to a certain channel. 
-Image* Add(Image* I1, Image* I2); // Combines 2 images.
+Image* Add(Image* image, char channel);
 
 Image* Overlay(Image* I1, Image* I2);
 
@@ -39,14 +39,15 @@ int main(int argc, const char** argv) {
 	/*int option;
 	std::cout << "Choose a task to test: (1-10)" << std::endl;
 	std::cin >> option;*/
-	Task1();
+	/*Task1();
 	Task2();
 	Task3();
 	Task4();
 	Task5();
 	Task6();
 	Task7();
-	Task8();
+	Task8();*/
+	Task9();
 	// Test Cases.
 	/*if (option == 1)
 		Task1();
@@ -188,35 +189,35 @@ Image* Add(Image* image , int num, char channel) {
 	return out;
 }
 
-Image* Add(Image* I1, Image* I2) {
+Image* Add(Image* I1, Image* I2, char channel) { // The second image is the channel to be copied.
 	Image* out = I1;
 
-	int i = 0;
-
-	for (unsigned char*& px : out->GetPixels()) {
-		// Blue channels.
-		if (static_cast<int>(px[0]) + I2->GetPixels()[i][0] > 255)
-			px[0] = 255;
-		else {
-			px[0] += static_cast<int>(I2->GetPixels()[i][0]);
+	std::vector<unsigned char*> I1Px = out->GetPixels();
+	std::vector<unsigned char*> I2Px = I2->GetPixels();
+	
+	if (channel == 'b') {
+		int i = 0;
+		for (unsigned char*& px : I1Px) {
+			px[0] = I2Px[i][0];
+			++i;
 		}
-
-		// Green channels.
-		if (static_cast<int>(px[1]) + I2->GetPixels()[i][1] > 255)
-			px[1] = 255;
-		else {
-			px[1] += static_cast<int>(I2->GetPixels()[i][1]);
-		}
-
-		// Red channels.
-		if (static_cast<int>(px[2]) + I2->GetPixels()[i][2] > 255)
-			px[2] = 255;
-		else {
-			px[2] += static_cast<int>(I2->GetPixels()[i][2]);
-		}
-
-		++i;
 	}
+	else if (channel == 'g') {
+		int i = 0;
+		for (unsigned char*& px : I1Px) {
+			px[1] = I2Px[i][1];
+			++i;
+		}
+	}
+	else if (channel == 'r') {
+		int i = 0;
+		for (unsigned char*& px : I1Px) {
+			px[2] = I2Px[i][2];
+			++i;
+		}
+	}
+
+
 	return out;
 }
 
@@ -557,5 +558,17 @@ void Task8() {
 	WriteFile("part8_g.tga", green);
 	WriteFile("part8_b.tga", blue);
 }
-void Task9() {}
+void Task9() {
+	Image* red = LoadFile("layer_red.tga");
+	Image* green = LoadFile("layer_green.tga");
+	Image* blue = LoadFile("layer_blue.tga");
+
+	Image* res = LoadFile("layer_red.tga"); // Used as baseline.
+
+	res = Add(res, red, 'r');
+	res = Add(res, green, 'g');
+	res = Add(res, blue, 'b');
+
+	WriteFile("part9.tga", res);
+}
 void Task10() {}
