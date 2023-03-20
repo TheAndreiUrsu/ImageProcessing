@@ -35,12 +35,19 @@ void Task9();
 void Task10();
 
 int main(int argc, const char** argv) {
-	int option;
+	/*int option;
 	std::cout << "Choose a task to test: (1-10)" << std::endl;
-	std::cin >> option;
-	
+	std::cin >> option;*/
+	/*Task1();
+	Task2();
+	Task3();
+	Task4();*/
+	Task5();
+	/*Task6();
+	Task7();
+	Task8();*/
 	// Test Cases.
-	if (option == 1)
+	/*if (option == 1)
 		Task1();
 	else if (option == 2)
 		Task2();
@@ -59,7 +66,7 @@ int main(int argc, const char** argv) {
 	else if (option == 9)
 		Task9();
 	else if (option == 10)
-		Task10();
+		Task10();*/
 	
 
 	// CLI
@@ -186,6 +193,27 @@ Image* Overlay(Image* I1, Image* I2) {
 	std::vector<float*> I1_Norm = Normalize(I1->GetPixels());
 	std::vector<float*> I2_Norm = Normalize(I2->GetPixels());
 
+	std::cout << "\n I1.";
+	for (int i = 2; i < out->GetPixels().size(); i *= 2) {
+		std::cout << "\n Pixel " << i << ":\n(" << (int)out->GetPixels()[i][0] << ", " << (int)out->GetPixels()[i][1] << ", " << (int)out->GetPixels()[i][2] << ")\n";
+	}
+	std::cout << "\n I2 px.";
+	for (int i = 2; i < I2->GetPixels().size(); i *= 2) {
+		std::cout << "\n Pixel " << i << ":\n(" << (int)I2->GetPixels()[i][0] << ", " << (int)I2->GetPixels()[i][1] << ", " << (int)I2->GetPixels()[i][2] << ")\n";
+	}
+
+	/*std::cout << "\nnorm px.";
+	for (int i = 2; i <I1_Norm.size(); i *= 2) {
+		if (I2_Norm[i][0] <= 0.5) {
+			std::cout << "Do 2 * NP1 * NP2" << std::endl;
+		}
+		else if (I2_Norm[i][0] > 0.5) {
+			std::cout << "Do 1 - [2 * (1 - NP1) * (1 - NP2)]" << std::endl;
+		}
+		std::cout << "\n Pixel " << i << ":\n(" << I1_Norm[i][0] << ", " << I1_Norm[i][1] << ", " << I1_Norm[i][2] << ")\n";
+	}*/
+
+
 	int i = 0;
 
 	for (unsigned char*& px : out->GetPixels()) {
@@ -195,7 +223,7 @@ Image* Overlay(Image* I1, Image* I2) {
 			px[0] = static_cast<unsigned char>((2 * I2_Norm[i][0] * I1_Norm[i][0]) * 255 + 0.5f);
 		}
 		else if (I2_Norm[i][0] > 0.5) {
-			px[0] = static_cast<unsigned char>(1 - (2 * (1 - I1_Norm[i][0]) * (1 - I2_Norm[i][0])) * 255 + 0.5f);
+			px[0] = static_cast<unsigned char>((1 - (2 * (1 - I1_Norm[i][0]) * (1 - I2_Norm[i][0]))) * 255 + 0.5f); // 1 - (2 * (1 - NP1)  * (1 - NP2))
 		}
 
 		// Green channels.
@@ -203,7 +231,7 @@ Image* Overlay(Image* I1, Image* I2) {
 			px[1] = static_cast<unsigned char>((2 * I2_Norm[i][1] * I1_Norm[i][1]) * 255 + 0.5f);
 		}
 		else if (I2_Norm[i][1] > 0.5) {
-			px[1] = static_cast<unsigned char>(1 - (2 * (1 - I1_Norm[i][1]) * (1 - I2_Norm[i][1])) * 255 + 0.5f);
+			px[1] = static_cast<unsigned char>((1 - (2 * (1 - I1_Norm[i][1]) * (1 - I2_Norm[i][1]))) * 255 + 0.5f);
 		}
 
 		// Red channels.
@@ -211,10 +239,15 @@ Image* Overlay(Image* I1, Image* I2) {
 			px[2] = static_cast<unsigned char>((2 * I2_Norm[i][2] * I1_Norm[i][2]) * 255 + 0.5f);
 		}
 		else if (I2_Norm[i][2] > 0.5) {
-			px[2] = static_cast<unsigned char>(1 - (2 * (1 - I1_Norm[i][2]) * (1 - I2_Norm[i][2])) * 255 + 0.5f);
+			px[2] = static_cast<unsigned char>((1 - (2 * (1 - I1_Norm[i][2]) * (1 - I2_Norm[i][2]))) * 255 + 0.5f);
 		}
 
 		++i;
+	}
+
+	std::cout << "\n Out px.";
+	for (int i = 2; i < out->GetPixels().size(); i *= 2) {
+		std::cout << "\n Pixel " << i << ":\n(" << (float)out->GetPixels()[i][0] << ", " << (float)out->GetPixels()[i][1] << ", " << (float)out->GetPixels()[i][2] << ")\n";
 	}
 	return out;
 }
