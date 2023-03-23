@@ -24,6 +24,8 @@ Image* Flip(Image* image); // Flips an Image 180 deg.
 
 Image* Overlay(Image* I1, Image* I2);
 
+bool checkFile(std::string file);
+
 void Task1();
 void Task2();
 void Task3();
@@ -68,21 +70,10 @@ int main(int argc, const char** argv) {
 		std::string out_file = static_cast<std::string>(argv[1]);
 		std::string in_file = static_cast<std::string>(argv[2]);
 
-		std::size_t dot = out_file.find_last_of('.');
-		try {
-			if (dot == std::string::npos || out_file.substr(dot) != ".tga") // Checks if the out_file is correctly named.
-				std::cout << "Invalid file name!" << std::endl;
-		}
-		catch (...) { std::cout << "Invalid file name!" << std::endl; }
-		
-		
-		dot = in_file.find_last_of('.');
-		try {
-			if (dot == std::string::npos || in_file.substr(dot) != ".tga")
-				std::cout << "Invalid file name!" << std::endl;
-		}
-		catch (...) { std::cout << "Invalid file name!" << std::endl; }
-		
+		if (!checkFile(out_file))
+			std::cout << "Invalid file name!" << std::endl;
+		if(!checkFile(in_file))
+			std::cout << "Invalid file name!" << std::endl;
 			
 		std::cout << "No method provided!" << std::endl;
 
@@ -92,6 +83,17 @@ int main(int argc, const char** argv) {
 	}
 
 	return 0;
+}
+
+bool checkFile(std::string file) { // Checks if the file extension is ".tga".
+	std::size_t dot = file.find_last_of('.');
+	try {
+		if (dot == std::string::npos || file.substr(dot) != ".tga") // Checks if the out_file is correctly named.
+			return false;
+	}
+	catch (...) { return false; }
+
+	return true;
 }
 
 Image* Subtract(Image* _top, Image* _bottom) { // Subtracts pixels in file 2 from file 1.
