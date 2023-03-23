@@ -6,7 +6,7 @@
 #include <string>
 
 Image* LoadFile(std::string _file); // loads the .tga file and returns the image.
-void WriteFile(std::string _file); // writes the .tga file.
+void WriteFile(std::string _file, Image* image); // writes the .tga file.
 
 Image* Multiply(Image* _top, Image* _bottom); // Multiplies every pixel in _file2 by _file1. Done by first dividing the pixels in _file2 by 255, doing the multiplication and then multiplying by 255 to get the right pixel.
 Image* Multiply(Image* image, int scale, char channel); // Multiplies the channel in _file1 by the scale value.
@@ -24,7 +24,8 @@ Image* Flip(Image* image); // Flips an Image 180 deg.
 
 Image* Overlay(Image* I1, Image* I2);
 
-bool checkFile(std::string file);
+bool checkFile(const std::string& file);
+bool checkMethods(const std::string& method); // Checks if the method is valid.
 
 void Task1();
 void Task2();
@@ -49,8 +50,6 @@ int main(int argc, const char** argv) {
 	Task9();
 	Task10();*/
 
-	std::vector<const char*> methods = { "combine","screen","multiply","subtract","overlay","addred","addgreen","addblue","scalered","scalegreen","scaleblue","onlyred","onlygreen","onlyblue","flip" };
-
 	// CLI
 	
 	if (argc == 1) {
@@ -71,21 +70,51 @@ int main(int argc, const char** argv) {
 		std::string in_file = static_cast<std::string>(argv[2]);
 
 		if (!checkFile(out_file))
-			std::cout << "Invalid file name!" << std::endl;
+			std::cout << "Invalid file name." << std::endl;
 		if(!checkFile(in_file))
-			std::cout << "Invalid file name!" << std::endl;
+			std::cout << "Invalid file name." << std::endl;
 			
-		std::cout << "No method provided!" << std::endl;
+		std::cout << "Invalid method name." << std::endl;
 
 	}
 	else if (argc > 3) {
+		// Check method names and file names again.
+		std::string out_file = static_cast<std::string>(argv[1]);
+		std::string in_file = static_cast<std::string>(argv[2]);
 
+		if (!checkFile(out_file))
+			std::cout << "Invalid file name." << std::endl;
+		if (!checkFile(in_file))
+			std::cout << "Invalid file name." << std::endl;
+
+		std::string method = static_cast<std::string>(argv[3]);
+		if (!checkMethods(method)) {
+			std::cout << "Invalid method name." << std::endl;
+			return 0;
+		}
+
+		// Flip method first.
+		if (method == "flip") {
+			if (LoadFile(in_file) == nullptr) {
+				std::cout << "File does not exist." << std::endl;
+				return 0;
+			}
+			if (argc > 4) {
+				std::cout << "Invalid argument. No argument needed." << std::endl;
+				return 0;
+			}
+			Image* in = LoadFile(in_file);
+			Image* out = Flip(in);
+			WriteFile(out_file, out);
+		}
+			
+		
 	}
 
 	return 0;
 }
 
-bool checkFile(std::string file) { // Checks if the file extension is ".tga".
+bool checkFile(const std::string& file) { // Checks if the file extension is ".tga".
 	std::size_t dot = file.find_last_of('.');
 	try {
 		if (dot == std::string::npos || file.substr(dot) != ".tga") // Checks if the out_file is correctly named.
@@ -94,6 +123,12 @@ bool checkFile(std::string file) { // Checks if the file extension is ".tga".
 	catch (...) { return false; }
 
 	return true;
+}
+
+bool checkMethods(const std::string& method) {  
+	if (method == "combine" || method == "screen" || method == "multiply" || method == "subtract" || method == "overlay" || method == "addred" || method == "addgreen" || method == "addblue" || method == "scalered" || method == "scalegreen" || method == "scaleblue" || method == "onlyred" || method == "onlygreen" || method == "onlyblue" || method == "flip")
+		return true;
+	return false;
 }
 
 Image* Subtract(Image* _top, Image* _bottom) { // Subtracts pixels in file 2 from file 1.
@@ -349,16 +384,16 @@ Image* Screen(Image* top, Image* bottom) {
 }
 
 Image* Flip(Image* image) {
-	Image* out(image);
+	Image* out = image;
 
 	int i = image->GetPixels().size() - 1; // Start at the last pixel.
 	for (unsigned char*& px : out->GetPixels()) { // Reverses the list of pixels.
 		px[0] = image->GetPixels()[i][0]; 
 		px[1] = image->GetPixels()[i][1];
 		px[2] = image->GetPixels()[i][2];
-
 		--i;
 	}
+
 	return out;
 }
 
@@ -616,7 +651,16 @@ void Task9() {
 }
 void Task10() {
 	Image* image = LoadFile("text2.tga");
-	Image* out = Flip(image);
+	Image* out = LoadFile("text2.tga");
+
+	int i = image->GetPixels().size() - 1; // Start at the last pixel.
+	for (unsigned char*& px : out->GetPixels()) { // Reverses the list of pixels.
+		px[0] = image->GetPixels()[i][0];
+		px[1] = image->GetPixels()[i][1];
+		px[2] = image->GetPixels()[i][2];
+
+		--i;
+	}
 	
 	WriteFile("part10.tga", out);
 
