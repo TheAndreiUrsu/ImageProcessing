@@ -24,6 +24,10 @@ Image* Flip(Image* image); // Flips an Image 180 deg.
 
 Image* Overlay(Image* I1, Image* I2);
 
+Image* Combine(Image* red, Image* green, Image* blue); // Combines all 3 channels into one image.
+
+Image* GreyScale(Image* image, char channel); // Creates a greyscale image depending on the channel chosen.
+
 bool checkFile(const std::string& file);
 bool checkMethods(const std::string& method); // Checks if the method is valid.
 
@@ -39,7 +43,7 @@ void Task9();
 void Task10();
 
 int main(int argc, const char** argv) {
-	/*Task1();
+	Task1();
 	Task2();
 	Task3();
 	Task4();
@@ -48,12 +52,13 @@ int main(int argc, const char** argv) {
 	Task7();
 	Task8();
 	Task9();
-	Task10();*/
+	Task10();
 
 	// CLI
 	
 	if (argc == 1) {
 		std::cout << "You didn't pass any arguments!" << std::endl;
+		//Task10();
 	}
 	else if (argc == 2) { // Used for help command.
 	
@@ -107,7 +112,209 @@ int main(int argc, const char** argv) {
 			Image* out = Flip(in);
 			WriteFile(out_file, out);
 		}
+
+		// Methods requiring 2 file inputs.
+		else if (method == "screen") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+				
+			std::string in2_file = static_cast<std::string>(argv[4]);
+			if (!checkFile(in2_file))
+				std::cout << "Invalid argument, invalid file name." << std::endl;
+			else if (LoadFile(in2_file) == nullptr)
+				std::cout << "Invalid argument, file does not exist." << std::endl;
+			else {
+				Image* in1 = LoadFile(in_file);
+				Image* in2 = LoadFile(in2_file);
+				Image* out = Screen(in1, in2);
+				WriteFile(out_file, out);
+			}
+		}
+		
+		else if (method == "multiply") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			std::string in2_file = static_cast<std::string>(argv[4]);
+			if (!checkFile(in2_file))
+				std::cout << "Invalid argument, invalid file name." << std::endl;
+			else if (LoadFile(in2_file) == nullptr)
+				std::cout << "Invalid argument, file does not exist." << std::endl;
+			else {
+				Image* in1 = LoadFile(in_file);
+				Image* in2 = LoadFile(in2_file);
+				Image* out = Multiply(in1, in2);
+				WriteFile(out_file, out);
+			}
+		}
+
+		else if (method == "subtract") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			std::string in2_file = static_cast<std::string>(argv[4]);
+			if (!checkFile(in2_file))
+				std::cout << "Invalid argument, invalid file name." << std::endl;
+			else if (LoadFile(in2_file) == nullptr)
+				std::cout << "Invalid argument, file does not exist." << std::endl;
+			else {
+				Image* in1 = LoadFile(in_file);
+				Image* in2 = LoadFile(in2_file);
+				Image* out = Subtract(in1, in2);
+				WriteFile(out_file, out);
+			}
+		}
+
+		else if (method == "overlay") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			std::string in2_file = static_cast<std::string>(argv[4]);
+			if (!checkFile(in2_file))
+				std::cout << "Invalid argument, invalid file name." << std::endl;
+			else if (LoadFile(in2_file) == nullptr)
+				std::cout << "Invalid argument, file does not exist." << std::endl;
+			else {
+				Image* in1 = LoadFile(in_file);
+				Image* in2 = LoadFile(in2_file);
+				Image* out = Overlay(in1, in2);
+				WriteFile(out_file, out);
+			}
+		}
+
+		// Methods requiring numbers
+
+		// Adding.
+		else if (method == "addred") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			int scale;
+			try {
+				scale = std::stoi(argv[4]);
+			}
+			catch (std::invalid_argument& e) {
+				std::cout << "Invalid argument, expected number." << std::endl;
+				return 0;
+			}
+
+			Image* in1 = LoadFile(in_file);
+			Image* out = Add(in1, scale, 'r');
 			
+			WriteFile(out_file, out);
+		}
+		else if (method == "addgreen") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			int scale;
+			try {
+				scale = std::stoi(argv[4]);
+			}
+			catch (std::invalid_argument& e) {
+				std::cout << "Invalid argument, expected number." << std::endl;
+				return 0;
+			}
+
+			Image* in1 = LoadFile(in_file);
+			Image* out = Add(in1, scale, 'g');
+			
+			WriteFile(out_file, out);
+		}
+		else if (method == "addblue") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			int scale;
+			try {
+				scale = std::stoi(argv[4]);
+			}
+			catch (std::invalid_argument& e) {
+				std::cout << "Invalid argument, expected number." << std::endl;
+				return 0;
+			}
+
+			Image* in1 = LoadFile(in_file);
+			Image* out = Add(in1, scale, 'b');
+			
+			WriteFile(out_file, out);
+		}
+		
+		//Scaling.
+		else if (method == "scalered") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			int scale;
+			try {
+				scale = std::stoi(argv[4]);
+			}
+			catch (std::invalid_argument& e) {
+				std::cout << "Invalid argument, expected number." << std::endl;
+				return 0;
+			}
+
+			Image* in1 = LoadFile(in_file);
+			Image* out = Multiply(in1, scale, 'r');
+			
+			WriteFile(out_file, out);
+		}
+		else if (method == "scalegreen") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			int scale;
+			try {
+				scale = std::stoi(argv[4]);
+			}
+			catch (std::invalid_argument& e) {
+				std::cout << "Invalid argument, expected number." << std::endl;
+				return 0;
+			}
+
+			Image* in1 = LoadFile(in_file);
+			Image* out = Multiply(in1, scale, 'g');
+			
+			WriteFile(out_file, out);
+		}
+		else if (method == "scaleblue") {
+			if (argc == 4) {
+				std::cout << "Missing argument.";
+				return 0;
+			}
+
+			int scale;
+			try {
+				scale = std::stoi(argv[4]);
+			}
+			catch (std::invalid_argument& e) {
+				std::cout << "Invalid argument, expected number." << std::endl;
+				return 0;
+			}
+
+			Image* in1 = LoadFile(in_file);
+			Image* out = Multiply(in1, scale, 'b');
+			
+			WriteFile(out_file, out);
+		}
 		
 	}
 
@@ -397,6 +604,43 @@ Image* Flip(Image* image) {
 	return out;
 }
 
+Image* Combine(Image* red, Image* green, Image* blue) {
+	Image* res = red;
+
+	res = Add(res, red, 'r');
+	res = Add(res, green, 'g');
+	res = Add(res, blue, 'b');
+
+	return res;
+}
+
+Image* GreyScale(Image* image, char channel) {
+	if (channel == 'r') {
+		// Iterate through the pixels, to create a grayscale image based on red.
+		for (unsigned char*& px : image->GetPixels()) {
+			px[0] = px[2];
+			px[1] = px[2];
+		}
+		return image;
+	}
+	else if (channel == 'g') {
+		// Iterate through the pixels, to create a grayscale image based on green.
+		for (unsigned char*& px : image->GetPixels()) {
+			px[0] = px[1];
+			px[2] = px[1];
+		}
+		return image;
+	}
+	else if (channel == 'b') {
+		// Iterate through the pixels, to create a grayscale image based on blue.
+		for (unsigned char*& px : image->GetPixels()) {
+			px[1] = px[0];
+			px[2] = px[0];
+		}
+		return image;
+	}
+}
+
 void WriteFile(std::string _file, Image* _image) {
 	// Testing writing, by changing the first pixel.
 	std::ofstream file("output/" + _file, std::ios_base::out | std::ios_base::binary);
@@ -597,21 +841,9 @@ void Task8() {
 	Image* green = LoadFile("car.tga");
 	Image* blue = LoadFile("car.tga");
 
-	// Iterate through the pixels, to create a grayscale image based on red.
-	for (unsigned char*& px : red->GetPixels()) {
-		px[0] = px[2];
-		px[1] = px[2];
-	}
-	// Iterate through the pixels, to create a grayscale image based on green.
-	for (unsigned char*& px : green->GetPixels()) {
-		px[0] = px[1];
-		px[2] = px[1];
-	}
-	// Iterate through the pixels, to create a grayscale image based on blue.
-	for (unsigned char*& px : blue->GetPixels()) {
-		px[1] = px[0];
-		px[2] = px[0];
-	}
+	red = GreyScale(red, 'r');
+	green = GreyScale(green, 'g');
+	blue = GreyScale(blue, 'b');
 
 	// Write the files.
 	WriteFile("part8_r.tga", red);
@@ -631,11 +863,11 @@ void Task9() {
 	Image* green = LoadFile("layer_green.tga");
 	Image* blue = LoadFile("layer_blue.tga");
 
-	Image* res = LoadFile("layer_red.tga"); // Used as baseline.
+	Image* res = Combine(red, green, blue);//LoadFile("layer_red.tga"); // Used as baseline.
 
-	res = Add(res, red, 'r');
+	/*res = Add(res, red, 'r');
 	res = Add(res, green, 'g');
-	res = Add(res, blue, 'b');
+	res = Add(res, blue, 'b');*/
 
 	WriteFile("part9.tga", res);
 
@@ -646,27 +878,14 @@ void Task9() {
 		delete px;
 	for (unsigned char*& px : blue->GetPixels())
 		delete px;
-	for (unsigned char*& px : res->GetPixels())
-		delete px;
 }
 void Task10() {
 	Image* image = LoadFile("text2.tga");
-	Image* out = LoadFile("text2.tga");
-
-	int i = image->GetPixels().size() - 1; // Start at the last pixel.
-	for (unsigned char*& px : out->GetPixels()) { // Reverses the list of pixels.
-		px[0] = image->GetPixels()[i][0];
-		px[1] = image->GetPixels()[i][1];
-		px[2] = image->GetPixels()[i][2];
-
-		--i;
-	}
+	Image* out = Flip(image);
 	
 	WriteFile("part10.tga", out);
 
 	// Erasing from heap.
 	for (unsigned char*& px : image->GetPixels())
-		delete px;
-	for (unsigned char*& px : out->GetPixels())
 		delete px;
 }
