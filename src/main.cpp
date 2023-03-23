@@ -65,11 +65,26 @@ int main(int argc, const char** argv) {
 		}
 	}
 	else if (argc == 3) { // Checking if no methods are provided.
-		std::size_t ext = static_cast<std::string>(argv[1]).find_last_of(".tga");
-		std::cout << argv[1] << std::endl;
-		if (ext == std::string::npos)
-			std::cout << "Invalid file name!" << std::endl;
-		//std::cout << "No method provided!" << std::endl;
+		std::string out_file = static_cast<std::string>(argv[1]);
+		std::string in_file = static_cast<std::string>(argv[2]);
+
+		std::size_t dot = out_file.find_last_of('.');
+		try {
+			if (dot == std::string::npos || out_file.substr(dot) != ".tga") // Checks if the out_file is correctly named.
+				std::cout << "Invalid file name!" << std::endl;
+		}
+		catch (...) { std::cout << "Invalid file name!" << std::endl; }
+		
+		
+		dot = in_file.find_last_of('.');
+		try {
+			if (dot == std::string::npos || in_file.substr(dot) != ".tga")
+				std::cout << "Invalid file name!" << std::endl;
+		}
+		catch (...) { std::cout << "Invalid file name!" << std::endl; }
+		
+			
+		std::cout << "No method provided!" << std::endl;
 
 	}
 	else if (argc > 3) {
