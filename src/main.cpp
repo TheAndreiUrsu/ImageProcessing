@@ -43,7 +43,7 @@ void Task9();
 void Task10();
 
 int main(int argc, const char** argv) {
-	Task1();
+	/*Task1();
 	Task2();
 	Task3();
 	Task4();
@@ -52,13 +52,15 @@ int main(int argc, const char** argv) {
 	Task7();
 	Task8();
 	Task9();
+	Task10();*/
 	Task10();
 
 	// CLI
+
+	std::vector<Image*> images;
 	
 	if (argc == 1) {
 		std::cout << "You didn't pass any arguments!" << std::endl;
-		//Task10();
 	}
 	else if (argc == 2) { // Used for help command.
 	
@@ -594,11 +596,13 @@ Image* Flip(Image* image) {
 	Image* out = image;
 
 	int i = image->GetPixels().size() - 1; // Start at the last pixel.
-	for (unsigned char*& px : out->GetPixels()) { // Reverses the list of pixels.
-		px[0] = image->GetPixels()[i][0]; 
-		px[1] = image->GetPixels()[i][1];
-		px[2] = image->GetPixels()[i][2];
-		--i;
+	int j = 0;
+
+	for (; i > 0; i--) {
+		out->GetPixels()[i][0] = image->GetPixels()[j][0];
+		out->GetPixels()[i][1] = image->GetPixels()[j][1];
+		out->GetPixels()[i][2] = image->GetPixels()[j][2];
+		++j;
 	}
 
 	return out;
@@ -863,11 +867,7 @@ void Task9() {
 	Image* green = LoadFile("layer_green.tga");
 	Image* blue = LoadFile("layer_blue.tga");
 
-	Image* res = Combine(red, green, blue);//LoadFile("layer_red.tga"); // Used as baseline.
-
-	/*res = Add(res, red, 'r');
-	res = Add(res, green, 'g');
-	res = Add(res, blue, 'b');*/
+	Image* res = Combine(red, green, blue);
 
 	WriteFile("part9.tga", res);
 
