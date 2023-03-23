@@ -20,6 +20,8 @@ Image* Subtract(Image* _top, Image* _bottom); // Subtracts the pixels in top ima
 Image* Add(Image* image, int num, char channel); // Adds pixels to a certain channel. 
 Image* Add(Image* image, char channel);
 
+Image* Flip(Image* image); // Flips an Image 180 deg.
+
 Image* Overlay(Image* I1, Image* I2);
 
 void Task1();
@@ -62,21 +64,16 @@ int main(int argc, const char** argv) {
 			std::cout << "Invalid file name." << std::endl;
 		}
 	}
-	else if (argc > 2) {
+	else if (argc == 3) { // Checking if no methods are provided.
+		std::size_t ext = static_cast<std::string>(argv[1]).find_last_of(".tga");
+		std::cout << argv[1] << std::endl;
+		if (ext == std::string::npos)
+			std::cout << "Invalid file name!" << std::endl;
+		//std::cout << "No method provided!" << std::endl;
 
-		if (argc == 3)
-			std::cout << "No method provided!" << std::endl;
-		else {
-			size_t ext = static_cast<std::string>(argv[1]).find(".tga");
-			if (ext == std::string::npos)
-				std::cout << "Invalid file name." << std::endl;
-			ext = static_cast<std::string>(argv[2]).find(".tga");
-			if (ext == std::string::npos)
-				std::cout << "Invalid file name." << std::endl;
-		}
+	}
+	else if (argc > 3) {
 
-		
-		
 	}
 
 	return 0;
@@ -302,7 +299,6 @@ Image* Multiply(Image* image, int scale, char channel) {
 		}
 	}
 
-
 	return out;
 }
 
@@ -333,6 +329,20 @@ Image* Screen(Image* top, Image* bottom) {
 	}
 
 	return bottom;
+}
+
+Image* Flip(Image* image) {
+	Image* out(image);
+
+	int i = image->GetPixels().size() - 1; // Start at the last pixel.
+	for (unsigned char*& px : out->GetPixels()) { // Reverses the list of pixels.
+		px[0] = image->GetPixels()[i][0]; 
+		px[1] = image->GetPixels()[i][1];
+		px[2] = image->GetPixels()[i][2];
+
+		--i;
+	}
+	return out;
 }
 
 void WriteFile(std::string _file, Image* _image) {
@@ -441,11 +451,6 @@ Image* LoadFile(std::string _file) {
 
 	file.close();
 	return out;
-
-	//// Memory deallocation.
-	//for (unsigned int i = 0; i < pixels.size(); i++) {
-	//	delete[] pixels[i];
-	//}
 }
 
 void Task1() {
@@ -594,17 +599,8 @@ void Task9() {
 }
 void Task10() {
 	Image* image = LoadFile("text2.tga");
-	Image* out = LoadFile("text2.tga");
-
-	int i = image->GetPixels().size() - 1;
-	for (unsigned char*& px : out->GetPixels()) {
-		px[0] = image->GetPixels()[i][0];
-		px[1] = image->GetPixels()[i][1];
-		px[2] = image->GetPixels()[i][2];
-
-		--i;
-	}
-
+	Image* out = Flip(image);
+	
 	WriteFile("part10.tga", out);
 
 	// Erasing from heap.
