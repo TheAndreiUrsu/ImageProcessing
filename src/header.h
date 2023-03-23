@@ -54,7 +54,7 @@ public:
 
 	Image(std::vector<unsigned char*> pixels, char idLen, char hasColorMap, char imageType, short colorMapOrigin, short colorMapLen, short colorMapDepth, short xOrigin, short yOrigin, short width, short height, char bitsPerPixel, char imageDescriptor) {
 		this->pixels = pixels;
-		header = new Header(idLen, hasColorMap, imageType, colorMapOrigin, colorMapLen, colorMapDepth, xOrigin, yOrigin, width, height, bitsPerPixel, imageDescriptor);
+		this->header = new Header(idLen, hasColorMap, imageType, colorMapOrigin, colorMapLen, colorMapDepth, xOrigin, yOrigin, width, height, bitsPerPixel, imageDescriptor);
 	}
 
 	~Image() { // Destructor.
@@ -70,6 +70,9 @@ public:
 
 			for (unsigned int i = 0; i < that.header->height * that.header->width; i++)
 				this->pixels.at(i) = that.pixels.at(i);
+
+			delete this->header;
+			this->header = that.header;
 		}
 
 		return *this;
@@ -82,6 +85,9 @@ public:
 
 		for (unsigned int i = 0; i < that.header->height * that.header->width; i++)
 			this->pixels.at(i) = that.pixels.at(i);
+
+		delete this->header;
+		this->header = that.header;
 	}
 
 	void DebugHeader() {
