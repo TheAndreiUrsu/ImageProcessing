@@ -53,22 +53,23 @@ int main(int argc, const char** argv) {
 	Task8();
 	Task9();
 	Task10();*/
-	Task10();
+	//Task10();
 
 	// CLI
 
 	std::vector<Image*> images;
-	
+
+	// Checking whether 0, 1, 2, or 3 arguments are passed before continuing on.
 	if (argc == 1) {
 		std::cout << "You didn't pass any arguments!" << std::endl;
 	}
 	else if (argc == 2) { // Used for help command.
-	
-		if (std::strcmp(argv[1],"--help")==0) { // strcmp returns 0 if both strings are the same.
+
+		if (std::strcmp(argv[1], "--help") == 0) { // strcmp returns 0 if both strings are the same.
 			std::cout << "Project 2: Image Processing, Spring 2023\n" << std::endl;
 			std::cout << "Usage: \n\t./project2.out [output] [firstImage] [method] [...]" << std::endl;
 		}
-		else{
+		else {
 			std::cout << "Invalid file name." << std::endl;
 		}
 	}
@@ -78,247 +79,524 @@ int main(int argc, const char** argv) {
 
 		if (!checkFile(out_file))
 			std::cout << "Invalid file name." << std::endl;
-		if(!checkFile(in_file))
-			std::cout << "Invalid file name." << std::endl;
-			
-		std::cout << "Invalid method name." << std::endl;
-
-	}
-	else if (argc > 3) {
-		// Check method names and file names again.
-		std::string out_file = static_cast<std::string>(argv[1]);
-		std::string in_file = static_cast<std::string>(argv[2]);
-
-		if (!checkFile(out_file))
-			std::cout << "Invalid file name." << std::endl;
 		if (!checkFile(in_file))
 			std::cout << "Invalid file name." << std::endl;
 
+		std::cout << "Invalid method name." << std::endl;
+
+	}
+	else {
+		
+		// Check method names and file names again.
+		std::string out_file = static_cast<std::string>(argv[1]);
+		std::cout << "Out file: " << argv[1] << std::endl;
+		std::string in_file = static_cast<std::string>(argv[2]);
+		std::cout << "Input file: " << argv[2] << std::endl;
+
+		if (!checkFile(out_file)) {
+			std::cout << "Invalid file name." << std::endl;
+			return 0;
+		}
+
+		if (!checkFile(in_file)) {
+			std::cout << "Invalid file name." << std::endl;
+			return 0;
+		}
+
 		std::string method = static_cast<std::string>(argv[3]);
+		std::cout << "Method: " << argv[3] << std::endl;
 		if (!checkMethods(method)) {
 			std::cout << "Invalid method name." << std::endl;
 			return 0;
 		}
 
-		// Flip method first.
-		if (method == "flip") {
-			if (LoadFile(in_file) == nullptr) {
-				std::cout << "File does not exist." << std::endl;
-				return 0;
+		// Iterates through the arguments and compiles accordingly.
+		for (int i = 4; i < argc; i++) {
+			
+			// Flip method first.
+			if (method == "flip") {
+				if (LoadFile(in_file) == nullptr) {
+					std::cout << "File does not exist." << std::endl;
+					i = argc + 1;
+				}
+				if (argc > 4) {
+					std::cout << "Invalid argument. No argument needed." << std::endl;
+					i = argc + 1;
+				}
+				Image* in = LoadFile(in_file);
+				Image* out = Flip(in);
+				WriteFile(out_file, out);
 			}
-			if (argc > 4) {
-				std::cout << "Invalid argument. No argument needed." << std::endl;
-				return 0;
-			}
-			Image* in = LoadFile(in_file);
-			Image* out = Flip(in);
-			WriteFile(out_file, out);
-		}
 
-		// Methods requiring 2 file inputs.
-		else if (method == "screen") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
+			// Methods requiring 2 file inputs.
+			else if (method == "screen") {
+				if (argc == 4) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				std::string in2_file = static_cast<std::string>(argv[i + 1]);
+				if (!checkFile(in2_file)) {
+					std::cout << "Invalid argument, invalid file name." << std::endl;
+					i = argc + 1;
+				}
+				else if (LoadFile(in2_file) == nullptr) {
+					std::cout << "Invalid argument, file does not exist." << std::endl;
+					i = argc + 1;
+				}
+				else {
+					Image* in1 = LoadFile(in_file);
+					Image* in2 = LoadFile(in2_file);
+					Image* out = Screen(in1, in2);
+					WriteFile(out_file, out);
+				}
+
 			}
-				
-			std::string in2_file = static_cast<std::string>(argv[4]);
-			if (!checkFile(in2_file))
-				std::cout << "Invalid argument, invalid file name." << std::endl;
-			else if (LoadFile(in2_file) == nullptr)
-				std::cout << "Invalid argument, file does not exist." << std::endl;
-			else {
+			else if (method == "multiply") {
+				if (argc == 4) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				std::string in2_file = static_cast<std::string>(argv[4]);
+				if (!checkFile(in2_file)) {
+					std::cout << "Invalid argument, invalid file name." << std::endl;
+					i = argc + 1;
+				}
+				else if (LoadFile(in2_file) == nullptr) {
+					std::cout << "Invalid argument, file does not exist." << std::endl;
+					i = argc + 1;
+				}
+				else {
+					Image* in1 = LoadFile(in_file);
+					Image* in2 = LoadFile(in2_file);
+					Image* out = Multiply(in1, in2);
+					WriteFile(out_file, out);
+				}
+			}
+
+			else if (method == "subtract") {
+				if (argc == 4) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				std::string in2_file = static_cast<std::string>(argv[i + 1]);
+				if (!checkFile(in2_file)) {
+					std::cout << "Invalid argument, invalid file name." << std::endl;
+					i = argc + 1;
+				}
+				else if (LoadFile(in2_file) == nullptr) {
+					std::cout << "Invalid argument, file does not exist." << std::endl;
+					i = argc + 1;
+				}
+				else {
+					Image* in1 = LoadFile(in_file);
+					Image* in2 = LoadFile(in2_file);
+					Image* out = Subtract(in1, in2);
+					WriteFile(out_file, out);
+				}
+			}
+
+			else if (method == "overlay") {
+				if (argc == 4) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				std::string in2_file = static_cast<std::string>(argv[4]);
+				if (!checkFile(in2_file)) {
+					std::cout << "Invalid argument, invalid file name." << std::endl;
+					i = argc + 1;
+				}
+				else if (LoadFile(in2_file) == nullptr) {
+					std::cout << "Invalid argument, file does not exist." << std::endl;
+					i = argc + 1;
+				}
+				else {
+					Image* in1 = LoadFile(in_file);
+					Image* in2 = LoadFile(in2_file);
+					Image* out = Overlay(in1, in2);
+					WriteFile(out_file, out);
+				}
+			}
+
+			// Methods requiring numbers
+
+			// Adding.
+			else if (method == "addred") {
+				if (argc == 4) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				int scale;
+				try {
+					scale = std::stoi(argv[4]);
+				}
+				catch (std::invalid_argument& e) {
+					std::cout << "Invalid argument, expected number." << std::endl;
+					i = argc + 1;
+				}
+
 				Image* in1 = LoadFile(in_file);
-				Image* in2 = LoadFile(in2_file);
-				Image* out = Screen(in1, in2);
+				Image* out = Add(in1, scale, 'r');
+
+				WriteFile(out_file, out);
+			}
+			else if (method == "addgreen") {
+				int scale;
+				try {
+					scale = std::stoi(argv[i + 1]);
+				}
+				catch (std::out_of_range& e) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				try {
+					scale = std::stoi(argv[i + 1]);
+				}
+				catch (std::invalid_argument& e) {
+					std::cout << "Invalid argument, expected number." << std::endl;
+					i = argc + 1;
+				}
+
+				Image* in1 = LoadFile(in_file);
+				Image* out = Add(in1, scale, 'g');
+
+				WriteFile(out_file, out);
+			}
+			else if (method == "addblue") {
+				int scale;
+				try {
+					scale = std::stoi(argv[i + 1]);
+				}
+				catch (std::out_of_range& e) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+				try {
+					scale = std::stoi(argv[4]);
+				}
+				catch (std::invalid_argument& e) {
+					std::cout << "Invalid argument, expected number." << std::endl;
+					return 0;
+				}
+
+				Image* in1 = LoadFile(in_file);
+				Image* out = Add(in1, scale, 'b');
+
+				WriteFile(out_file, out);
+			}
+
+			//Scaling.
+			else if (method == "scalered") {
+				int scale;
+				try {
+					scale = std::stoi(argv[i + 4]);
+				}
+				catch (std::out_of_range& e) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+
+				try {
+					scale = std::stoi(argv[4]);
+				}
+				catch (std::invalid_argument& e) {
+					std::cout << "Invalid argument, expected number." << std::endl;
+					return 0;
+				}
+
+				Image* in1 = LoadFile(in_file);
+				Image* out = Multiply(in1, scale, 'r');
+
+				WriteFile(out_file, out);
+			}
+			else if (method == "scalegreen") {
+				int scale;
+				try {
+					scale = std::stoi(argv[i + 1]);
+				}
+				catch (std::out_of_range& e) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+				try {
+					scale = std::stoi(argv[4]);
+				}
+				catch (std::invalid_argument& e) {
+					std::cout << "Invalid argument, expected number." << std::endl;
+					return 0;
+				}
+
+				Image* in1 = LoadFile(in_file);
+				Image* out = Multiply(in1, scale, 'g');
+
+				WriteFile(out_file, out);
+			}
+			else if (method == "scaleblue") {
+				int scale;
+				try {
+					scale = std::stoi(argv[i + 1]);
+				}
+				catch (std::out_of_range& e) {
+					std::cout << "Missing argument.";
+					i = argc + 1;
+				}
+				try {
+					scale = std::stoi(argv[4]);
+				}
+				catch (std::invalid_argument& e) {
+					std::cout << "Invalid argument, expected number." << std::endl;
+					return 0;
+				}
+
+				Image* in1 = LoadFile(in_file);
+				Image* out = Multiply(in1, scale, 'b');
+
 				WriteFile(out_file, out);
 			}
 		}
-		
-		else if (method == "multiply") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			std::string in2_file = static_cast<std::string>(argv[4]);
-			if (!checkFile(in2_file))
-				std::cout << "Invalid argument, invalid file name." << std::endl;
-			else if (LoadFile(in2_file) == nullptr)
-				std::cout << "Invalid argument, file does not exist." << std::endl;
-			else {
-				Image* in1 = LoadFile(in_file);
-				Image* in2 = LoadFile(in2_file);
-				Image* out = Multiply(in1, in2);
-				WriteFile(out_file, out);
-			}
-		}
-
-		else if (method == "subtract") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			std::string in2_file = static_cast<std::string>(argv[4]);
-			if (!checkFile(in2_file))
-				std::cout << "Invalid argument, invalid file name." << std::endl;
-			else if (LoadFile(in2_file) == nullptr)
-				std::cout << "Invalid argument, file does not exist." << std::endl;
-			else {
-				Image* in1 = LoadFile(in_file);
-				Image* in2 = LoadFile(in2_file);
-				Image* out = Subtract(in1, in2);
-				WriteFile(out_file, out);
-			}
-		}
-
-		else if (method == "overlay") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			std::string in2_file = static_cast<std::string>(argv[4]);
-			if (!checkFile(in2_file))
-				std::cout << "Invalid argument, invalid file name." << std::endl;
-			else if (LoadFile(in2_file) == nullptr)
-				std::cout << "Invalid argument, file does not exist." << std::endl;
-			else {
-				Image* in1 = LoadFile(in_file);
-				Image* in2 = LoadFile(in2_file);
-				Image* out = Overlay(in1, in2);
-				WriteFile(out_file, out);
-			}
-		}
-
-		// Methods requiring numbers
-
-		// Adding.
-		else if (method == "addred") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			int scale;
-			try {
-				scale = std::stoi(argv[4]);
-			}
-			catch (std::invalid_argument& e) {
-				std::cout << "Invalid argument, expected number." << std::endl;
-				return 0;
-			}
-
-			Image* in1 = LoadFile(in_file);
-			Image* out = Add(in1, scale, 'r');
-			
-			WriteFile(out_file, out);
-		}
-		else if (method == "addgreen") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			int scale;
-			try {
-				scale = std::stoi(argv[4]);
-			}
-			catch (std::invalid_argument& e) {
-				std::cout << "Invalid argument, expected number." << std::endl;
-				return 0;
-			}
-
-			Image* in1 = LoadFile(in_file);
-			Image* out = Add(in1, scale, 'g');
-			
-			WriteFile(out_file, out);
-		}
-		else if (method == "addblue") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			int scale;
-			try {
-				scale = std::stoi(argv[4]);
-			}
-			catch (std::invalid_argument& e) {
-				std::cout << "Invalid argument, expected number." << std::endl;
-				return 0;
-			}
-
-			Image* in1 = LoadFile(in_file);
-			Image* out = Add(in1, scale, 'b');
-			
-			WriteFile(out_file, out);
-		}
-		
-		//Scaling.
-		else if (method == "scalered") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			int scale;
-			try {
-				scale = std::stoi(argv[4]);
-			}
-			catch (std::invalid_argument& e) {
-				std::cout << "Invalid argument, expected number." << std::endl;
-				return 0;
-			}
-
-			Image* in1 = LoadFile(in_file);
-			Image* out = Multiply(in1, scale, 'r');
-			
-			WriteFile(out_file, out);
-		}
-		else if (method == "scalegreen") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			int scale;
-			try {
-				scale = std::stoi(argv[4]);
-			}
-			catch (std::invalid_argument& e) {
-				std::cout << "Invalid argument, expected number." << std::endl;
-				return 0;
-			}
-
-			Image* in1 = LoadFile(in_file);
-			Image* out = Multiply(in1, scale, 'g');
-			
-			WriteFile(out_file, out);
-		}
-		else if (method == "scaleblue") {
-			if (argc == 4) {
-				std::cout << "Missing argument.";
-				return 0;
-			}
-
-			int scale;
-			try {
-				scale = std::stoi(argv[4]);
-			}
-			catch (std::invalid_argument& e) {
-				std::cout << "Invalid argument, expected number." << std::endl;
-				return 0;
-			}
-
-			Image* in1 = LoadFile(in_file);
-			Image* out = Multiply(in1, scale, 'b');
-			
-			WriteFile(out_file, out);
-		}
-		
 	}
+	//if (argc > 3) {
+	//	// Check method names and file names again.
+	//	std::string out_file = static_cast<std::string>(argv[1]);
+	//	std::string in_file = static_cast<std::string>(argv[2]);
+
+	//	if (!checkFile(out_file))
+	//		std::cout << "Invalid file name." << std::endl;
+	//	if (!checkFile(in_file))
+	//		std::cout << "Invalid file name." << std::endl;
+
+	//	std::string method = static_cast<std::string>(argv[3]);
+	//	if (!checkMethods(method)) {
+	//		std::cout << "Invalid method name." << std::endl;
+	//		return 0;
+	//	}
+
+	//	// Flip method first.
+	//	if (method == "flip") {
+	//		if (LoadFile(in_file) == nullptr) {
+	//			std::cout << "File does not exist." << std::endl;
+	//			return 0;
+	//		}
+	//		if (argc > 4) {
+	//			std::cout << "Invalid argument. No argument needed." << std::endl;
+	//			return 0;
+	//		}
+	//		Image* in = LoadFile(in_file);
+	//		Image* out = Flip(in);
+	//		WriteFile(out_file, out);
+	//	}
+
+	//	// Methods requiring 2 file inputs.
+	//	else if (method == "screen") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		std::string in2_file = static_cast<std::string>(argv[4]);
+	//		if (!checkFile(in2_file))
+	//			std::cout << "Invalid argument, invalid file name." << std::endl;
+	//		else if (LoadFile(in2_file) == nullptr)
+	//			std::cout << "Invalid argument, file does not exist." << std::endl;
+	//		else {
+	//			Image* in1 = LoadFile(in_file);
+	//			Image* in2 = LoadFile(in2_file);
+	//			Image* out = Screen(in1, in2);
+	//			WriteFile(out_file, out);
+	//		}
+	//	}
+
+	//	else if (method == "multiply") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		std::string in2_file = static_cast<std::string>(argv[4]);
+	//		if (!checkFile(in2_file))
+	//			std::cout << "Invalid argument, invalid file name." << std::endl;
+	//		else if (LoadFile(in2_file) == nullptr)
+	//			std::cout << "Invalid argument, file does not exist." << std::endl;
+	//		else {
+	//			Image* in1 = LoadFile(in_file);
+	//			Image* in2 = LoadFile(in2_file);
+	//			Image* out = Multiply(in1, in2);
+	//			WriteFile(out_file, out);
+	//		}
+	//	}
+
+	//	else if (method == "subtract") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		std::string in2_file = static_cast<std::string>(argv[4]);
+	//		if (!checkFile(in2_file))
+	//			std::cout << "Invalid argument, invalid file name." << std::endl;
+	//		else if (LoadFile(in2_file) == nullptr)
+	//			std::cout << "Invalid argument, file does not exist." << std::endl;
+	//		else {
+	//			Image* in1 = LoadFile(in_file);
+	//			Image* in2 = LoadFile(in2_file);
+	//			Image* out = Subtract(in1, in2);
+	//			WriteFile(out_file, out);
+	//		}
+	//	}
+
+	//	else if (method == "overlay") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		std::string in2_file = static_cast<std::string>(argv[4]);
+	//		if (!checkFile(in2_file))
+	//			std::cout << "Invalid argument, invalid file name." << std::endl;
+	//		else if (LoadFile(in2_file) == nullptr)
+	//			std::cout << "Invalid argument, file does not exist." << std::endl;
+	//		else {
+	//			Image* in1 = LoadFile(in_file);
+	//			Image* in2 = LoadFile(in2_file);
+	//			Image* out = Overlay(in1, in2);
+	//			WriteFile(out_file, out);
+	//		}
+	//	}
+
+	//	// Methods requiring numbers
+
+	//	// Adding.
+	//	else if (method == "addred") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		int scale;
+	//		try {
+	//			scale = std::stoi(argv[4]);
+	//		}
+	//		catch (std::invalid_argument& e) {
+	//			std::cout << "Invalid argument, expected number." << std::endl;
+	//			return 0;
+	//		}
+
+	//		Image* in1 = LoadFile(in_file);
+	//		Image* out = Add(in1, scale, 'r');
+
+	//		WriteFile(out_file, out);
+	//	}
+	//	else if (method == "addgreen") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		int scale;
+	//		try {
+	//			scale = std::stoi(argv[4]);
+	//		}
+	//		catch (std::invalid_argument& e) {
+	//			std::cout << "Invalid argument, expected number." << std::endl;
+	//			return 0;
+	//		}
+
+	//		Image* in1 = LoadFile(in_file);
+	//		Image* out = Add(in1, scale, 'g');
+
+	//		WriteFile(out_file, out);
+	//	}
+	//	else if (method == "addblue") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		int scale;
+	//		try {
+	//			scale = std::stoi(argv[4]);
+	//		}
+	//		catch (std::invalid_argument& e) {
+	//			std::cout << "Invalid argument, expected number." << std::endl;
+	//			return 0;
+	//		}
+
+	//		Image* in1 = LoadFile(in_file);
+	//		Image* out = Add(in1, scale, 'b');
+
+	//		WriteFile(out_file, out);
+	//	}
+
+	//	//Scaling.
+	//	else if (method == "scalered") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		int scale;
+	//		try {
+	//			scale = std::stoi(argv[4]);
+	//		}
+	//		catch (std::invalid_argument& e) {
+	//			std::cout << "Invalid argument, expected number." << std::endl;
+	//			return 0;
+	//		}
+
+	//		Image* in1 = LoadFile(in_file);
+	//		Image* out = Multiply(in1, scale, 'r');
+
+	//		WriteFile(out_file, out);
+	//	}
+	//	else if (method == "scalegreen") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		int scale;
+	//		try {
+	//			scale = std::stoi(argv[4]);
+	//		}
+	//		catch (std::invalid_argument& e) {
+	//			std::cout << "Invalid argument, expected number." << std::endl;
+	//			return 0;
+	//		}
+
+	//		Image* in1 = LoadFile(in_file);
+	//		Image* out = Multiply(in1, scale, 'g');
+
+	//		WriteFile(out_file, out);
+	//	}
+	//	else if (method == "scaleblue") {
+	//		if (argc == 4) {
+	//			std::cout << "Missing argument.";
+	//			return 0;
+	//		}
+
+	//		int scale;
+	//		try {
+	//			scale = std::stoi(argv[4]);
+	//		}
+	//		catch (std::invalid_argument& e) {
+	//			std::cout << "Invalid argument, expected number." << std::endl;
+	//			return 0;
+	//		}
+
+	//		Image* in1 = LoadFile(in_file);
+	//		Image* out = Multiply(in1, scale, 'b');
+
+	//		WriteFile(out_file, out);
+	//	}
+
+	//}
+
+	
 
 	return 0;
 }
@@ -593,19 +871,58 @@ Image* Screen(Image* top, Image* bottom) {
 }
 
 Image* Flip(Image* image) {
-	Image* out = image;
+	Image* test = image;
+	
+	// Debugging before.
+	std::cout << "***** IMAGE (Last 4) DATA BEFORE FLIPPING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
 
-	int i = image->GetPixels().size() - 1; // Start at the last pixel.
-	int j = 0;
-
-	for (; i > 0; i--) {
-		out->GetPixels()[i][0] = image->GetPixels()[j][0];
-		out->GetPixels()[i][1] = image->GetPixels()[j][1];
-		out->GetPixels()[i][2] = image->GetPixels()[j][2];
-		++j;
+	for (unsigned int i = test->GetPixels().size()-4; i < test->GetPixels().size(); i++) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
 	}
 
-	return out;
+	// Debugging before.
+	std::cout << "***** IMAGE (First 4) DATA BEFORE FLIPPING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 0; i < 4; i++) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	int w = static_cast<int>(test->GetHeader()->width-1);
+
+	int j = static_cast<int>(test->GetHeader()->height-1);
+	// Reverse numbers.
+	for (int i = 0; i < image->GetPixels().size(); i++) {
+		image->GetPixels()[i * j + w][0] = image->GetPixels()[i][0];
+		image->GetPixels()[i * j + w][1] = image->GetPixels()[i][1];
+		image->GetPixels()[i * j + w][2] = image->GetPixels()[i][2];
+		std::cout << "I: " << i << std::endl;
+		std::cout << "J: " << j << std::endl;
+		j--;
+	}
+
+	// Debugging after.
+	std::cout << "***** IMAGE (Last 4) DATA AFTER FLIPPING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = test->GetPixels().size() - 4; i < test->GetPixels().size(); i++) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	// Debugging after.
+	std::cout << "***** IMAGE (First 4) DATA AFTER FLIPPING *****" << std::endl;
+	std::cout << "-----------------------" << std::endl << std::endl;
+
+	for (unsigned int i = 0; i < 4; i++) {
+		std::cout << "PIXEL " << i << ": " << std::endl;
+		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
+	}
+
+	return image;
 }
 
 Image* Combine(Image* red, Image* green, Image* blue) {
