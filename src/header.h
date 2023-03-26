@@ -57,9 +57,19 @@ public:
 		this->header = new Header(idLen, hasColorMap, imageType, colorMapOrigin, colorMapLen, colorMapDepth, xOrigin, yOrigin, width, height, bitsPerPixel, imageDescriptor);
 	}
 
+	Image() { // Default constructor
+		this->pixels[0][0] = 0;
+		this->pixels[0][1] = 0;
+		this->pixels[0][2] = 0;
+
+		this->header = new Header(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	}
+
 	~Image() { // Destructor.
 		for (unsigned int i = 0; i < this->pixels.size(); i++) 
 			delete[] this->pixels.at(i);
+
+		delete this->header;
 	}
 
 	Image& operator=(const Image& that) { // Coppy assignment.
