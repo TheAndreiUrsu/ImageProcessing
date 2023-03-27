@@ -965,55 +965,24 @@ Image* Screen(Image* top, Image* bottom) {
 }
 
 Image* Flip(Image* image) {
-	Image* test = image;
+	std::vector<unsigned char*> temp_px; // Temporarily storing flipped pixels.
 	
-	// Debugging before.
-	std::cout << "***** IMAGE (Last 4) DATA BEFORE FLIPPING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (size_t i = test->GetPixels().size()-4; i < test->GetPixels().size(); i++) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
-	}
-
-	// Debugging before.
-	std::cout << "***** IMAGE (First 4) DATA BEFORE FLIPPING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (unsigned int i = 0; i < 4; i++) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
-	}
-
-	int w = static_cast<int>(test->GetHeader()->width-1);
-
-	int j = static_cast<int>(test->GetHeader()->height-1);
 	// Reverse numbers.
-	for (int i = 0; i < image->GetPixels().size(); i++) {
-		image->GetPixels()[i * j + w][0] = image->GetPixels()[i][0];
-		image->GetPixels()[i * j + w][1] = image->GetPixels()[i][1];
-		image->GetPixels()[i * j + w][2] = image->GetPixels()[i][2];
-		std::cout << "I: " << i << std::endl;
-		std::cout << "J: " << j << std::endl;
-		j--;
+	for (int i = image->GetPixels().size()-1; i >= 0; i--) {
+		unsigned char* px = new unsigned char[3];
+		px[0] = image->GetPixels()[i][0];
+		px[1] = image->GetPixels()[i][1];
+		px[2] = image->GetPixels()[i][2];
+		temp_px.push_back(px);
 	}
 
-	// Debugging after.
-	std::cout << "***** IMAGE (Last 4) DATA AFTER FLIPPING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (size_t i = test->GetPixels().size() - 4; i < test->GetPixels().size(); i++) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
-	}
-
-	// Debugging after.
-	std::cout << "***** IMAGE (First 4) DATA AFTER FLIPPING *****" << std::endl;
-	std::cout << "-----------------------" << std::endl << std::endl;
-
-	for (unsigned int i = 0; i < 4; i++) {
-		std::cout << "PIXEL " << i << ": " << std::endl;
-		std::cout << "B: " << static_cast<int>(test->GetPixels().at(i)[0]) << ", G: " << static_cast<int>(test->GetPixels().at(i)[1]) << ", R: " << static_cast<int>(test->GetPixels().at(i)[2]) << std::endl;
+	// Assign flipped pixels to original image.
+	int i = 0;
+	for (auto*& px : image->GetPixels()) {
+		px[0] = temp_px[i][0];
+		px[1] = temp_px[i][1];
+		px[2] = temp_px[i][2];
+		++i;
 	}
 
 	return image;
